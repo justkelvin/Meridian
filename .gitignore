@@ -25,3 +25,5 @@ dist-ssr
 !.env.example
 .env
 .env.*
+code_dump.ts
+project_codebase_dump.txt
