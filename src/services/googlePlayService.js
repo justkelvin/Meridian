@@ -484,7 +484,15 @@ export async function translateGooglePlayContent(text, targetLocale, aiConfig, f
   const localeInfo = GP_LOCALES.find(l => l.code === targetLocale)
   const localeName = localeInfo?.name || targetLocale
 
-  const userMessage = `Translate to ${localeName} (max ${limit} chars):\n\n${text}`
+  const userMessage = `Task: Translate app metadata to ${localeName}.
+  Target Field: ${fieldType} (Character limit: ${limit})
+
+  Source Text:
+  "${text}"
+
+  Output Instruction:
+  Provide the ${localeName} translation as RAW TEXT only.
+  Strictly NO JSON, NO quotes, and NO conversational filler.`;
 
   try {
     let content

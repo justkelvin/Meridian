@@ -753,8 +753,11 @@ export async function translateText(
 ) {
   const { provider, apiKey, model, region, endpoint, serviceTier } = config;
 
-  const systemMessage =
-    "You are a helpful assistant. Follow the user's instructions precisely and respond with only the requested output.";
+  const systemMessage = `You are a specialized localization tool.
+Your output is piped directly into the application.
+Follow the user's requested output format exactly.
+If raw text is requested, return only the raw string value.
+If JSON is requested, return only valid JSON with no explanations or markdown.`;
 
   try {
     let content;

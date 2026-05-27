@@ -128,6 +128,8 @@ Original (English): "${value}"
 Requirements:
 - Keep it concise (max ${maxLength} characters)
 - Maintain the marketing tone
+- DO NOT use JSON.
+- DO NOT use quotes.
 - Do not add quotes around the translation
 - Preserve any brand names or technical terms
 - Make it sound natural in ${getLocaleName(targetLocale)}

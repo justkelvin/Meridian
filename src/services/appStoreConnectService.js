@@ -538,7 +538,15 @@ RULES:
 2. The translation MUST NOT exceed ${limit} characters
 3. Keep proper nouns, brand names, and app names unchanged unless they have an official localized version
 4. For keywords, keep them comma-separated and translate each keyword individually
-5. Output ONLY the translated text, nothing else`
+5. Output ONLY the translated text, nothing else
+
+CRITICAL CONSTRAINTS:
+1. Output ONLY the raw translated string.
+2. NO JSON objects. NO keys. NO curly braces {}.
+3. NO surrounding double quotes.
+4. NO explanations, preambles, or "Here is the translation".
+5. Max limit: ${limit} characters.
+6. Preserve formatting like newlines if present in the source.`
 
   const userMessage = `Translate to ${localeName} (max ${limit} chars):\n\n${text}`
 
