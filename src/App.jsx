@@ -527,11 +527,6 @@ function App() {
     return entries;
   }, [xcstringsData, searchQuery, filterLang]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [searchQuery, filterLang]);
-
   // Paginated translations
   const paginatedTranslations = useMemo(() => {
     const start = currentPage * ITEMS_PER_PAGE;
@@ -1483,13 +1478,19 @@ function App() {
                               <Input
                                 placeholder="Search strings, keys, or translations..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                  setSearchQuery(e.target.value);
+                                  setCurrentPage(0);
+                                }}
                                 className="pl-10 h-10 bg-background"
                               />
                             </div>
                             <select
                               value={filterLang}
-                              onChange={(e) => setFilterLang(e.target.value)}
+                              onChange={(e) => {
+                                setFilterLang(e.target.value);
+                                setCurrentPage(0);
+                              }}
                               className="h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium min-w-[160px]"
                             >
                               <option value="all">All Languages</option>
