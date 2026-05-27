@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play } from 'lucide-react'
-import { useTheme } from './ThemeProvider'
+import { useTheme } from './ThemeContext'
 import {
   Sidebar,
   SidebarContent,

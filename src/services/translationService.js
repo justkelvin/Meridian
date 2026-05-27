@@ -108,54 +108,6 @@ async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function buildPrompt(text, targetLangs, protectedWords) {
-  const formatSpecifiers = findFormatSpecifiers(text);
-  const protectedList =
-    protectedWords.length > 0 ? protectedWords.join(", ") : null;
-  const langList = targetLangs
-    .map((lang) => `${lang} (${LANG_NAMES[lang] || lang})`)
-    .join(", ");
-
-  let systemMessage = `You are a professional translator for a mobile app. Translate English text to multiple languages.
-
-CRITICAL RULES:
-1. Preserve ALL formatting specifiers (%@, %d, %lld, %s, etc.) EXACTLY as they appear
-2. Format specifiers MUST remain in the same order in ALL translations
-3. DO NOT translate or modify any format specifiers
-4. Maintain a natural, user-friendly tone`;
-
-  if (protectedList) {
-    systemMessage += `
-5. DO NOT translate these words/names, keep them exactly as-is: ${protectedList}`;
-  }
-
-  systemMessage += `
-${protectedList ? "6" : "5"}. Your output must be ONLY a JSON object with this structure:
-{
-  "translations": {
-    "fr": "French translation here",
-    "es": "Spanish translation here"
-  }
-}`;
-
-  let userMessage = `Translate this English text to the following languages: ${langList}
-
-English text: "${text}"
-`;
-
-  if (formatSpecifiers.length > 0) {
-    userMessage += `\nFormat specifiers that MUST be preserved exactly: ${formatSpecifiers.join(", ")}`;
-  }
-
-  if (protectedList) {
-    userMessage += `\nProtected words that MUST NOT be translated (keep as-is): ${protectedList}`;
-  }
-
-  userMessage += `\n\nRespond with ONLY a JSON object containing translations for ALL ${targetLangs.length} requested languages.`;
-
-  return { systemMessage, userMessage };
-}
-
 // Build prompt for batch translation (multiple texts at once)
 function buildBatchPrompt(texts, targetLangs, protectedWords) {
   const protectedList =
@@ -429,84 +381,6 @@ async function callGitHubModels(apiKey, model, systemMessage, userMessage) {
   return result.choices[0].message.content;
 }
 
-async function translateSingleText(
-  text,
-  targetLangs,
-  config,
-  protectedWords = [],
-) {
-  const { provider, apiKey, model, region, endpoint, serviceTier } = config;
-  const { systemMessage, userMessage } = buildPrompt(
-    text,
-    targetLangs,
-    protectedWords,
-  );
-
-  try {
-    let content;
-    switch (provider) {
-      case "openai":
-        content = await callOpenAI(
-          apiKey,
-          model,
-          systemMessage,
-          userMessage,
-          serviceTier,
-        );
-        break;
-      case "azure":
-        content = await callAzure(
-          apiKey,
-          model,
-          endpoint,
-          systemMessage,
-          userMessage,
-        );
-        break;
-      case "bedrock":
-        content = await callBedrock(
-          apiKey,
-          model,
-          region,
-          systemMessage,
-          userMessage,
-        );
-        break;
-      case "github":
-        content = await callGitHubModels(
-          apiKey,
-          model,
-          systemMessage,
-          userMessage,
-        );
-        break;
-      case "gemini":
-        content = await callGemini(apiKey, model, systemMessage, userMessage);
-        break;
-      default:
-        throw new Error(`Unknown provider: ${provider}`);
-    }
-
-    // Parse JSON response - strip markdown code blocks if present
-    let jsonContent = content.trim();
-    if (jsonContent.startsWith("```json")) {
-      jsonContent = jsonContent.slice(7);
-    } else if (jsonContent.startsWith("```")) {
-      jsonContent = jsonContent.slice(3);
-    }
-    if (jsonContent.endsWith("```")) {
-      jsonContent = jsonContent.slice(0, -3);
-    }
-    jsonContent = jsonContent.trim();
-
-    const parsed = JSON.parse(jsonContent);
-    return { translations: parsed.translations || {}, error: null };
-  } catch (error) {
-    console.error("Translation error:", error.message || error);
-    return { translations: {}, error: error.message || "Unknown error" };
-  }
-}
-
 // Translate multiple texts in a single API call
 async function translateBatch(texts, targetLangs, config, protectedWords = []) {
   const { provider, apiKey, model, region, endpoint, serviceTier } = config;
@@ -527,6 +401,9 @@ async function translateBatch(texts, targetLangs, config, protectedWords = []) {
           userMessage,
           serviceTier,
         );
+        break;
+      case "anthropic":
+        content = await callAnthropic(apiKey, model, systemMessage, userMessage);
         break;
       case "azure":
         content = await callAzure(
@@ -815,6 +692,9 @@ If JSON is requested, return only valid JSON with no explanations or markdown.`;
         break;
       case "github":
         content = await callGitHubModels(apiKey, model, systemMessage, prompt);
+        break;
+      case "anthropic":
+        content = await callAnthropic(apiKey, model, systemMessage, prompt);
         break;
       case "gemini":
         content = await callGemini(apiKey, model, systemMessage, prompt);

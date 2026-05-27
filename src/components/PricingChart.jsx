@@ -18,7 +18,7 @@ const TIER_COLORS = {
   low: '#3b82f6'     // blue-500
 }
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label: _label }) => {
   if (!active || !payload || !payload.length) return null
 
   const data = payload[0].payload

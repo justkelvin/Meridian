@@ -70,7 +70,7 @@ export async function decrypt(encryptedBase64, password) {
 
     const decoder = new TextDecoder()
     return { success: true, data: decoder.decode(decrypted) }
-  } catch (error) {
+  } catch {
     return { success: false, error: 'Invalid password or corrupted data' }
   }
 }

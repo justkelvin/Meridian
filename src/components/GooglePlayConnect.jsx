@@ -35,7 +35,7 @@ import {
 } from '@/services/googlePlayService'
 import { PROVIDERS } from '@/services/translationService'
 
-export default function GooglePlayConnect({ credentials, onCredentialsChange, aiConfig }) {
+export default function GooglePlayConnect({ credentials, onCredentialsChange: _onCredentialsChange, aiConfig }) {
   // Connection state
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState(null)

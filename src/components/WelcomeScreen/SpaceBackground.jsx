@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { createSeededRandom } from './random'
 
 // Custom shader for twinkling stars
 const starVertexShader = `
@@ -158,9 +159,11 @@ const nebulaFragmentShader = `
 
 export function Stars({ count = 3000 }) {
   const ref = useRef()
-  const uniformsRef = useRef({ uTime: { value: 0 } })
+  const materialRef = useRef()
+  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), [])
 
   const [positions, sizes, twinkleSpeeds, twinkleOffsets] = useMemo(() => {
+    const random = createSeededRandom(count * 13)
     const positions = new Float32Array(count * 3)
     const sizes = new Float32Array(count)
     const twinkleSpeeds = new Float32Array(count)
@@ -168,24 +171,26 @@ export function Stars({ count = 3000 }) {
 
     for (let i = 0; i < count; i++) {
       // Distribute stars in a sphere
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(2 * Math.random() - 1)
-      const radius = 50 + Math.random() * 100
+      const theta = random() * Math.PI * 2
+      const phi = Math.acos(2 * random() - 1)
+      const radius = 50 + random() * 100
 
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
       positions[i * 3 + 2] = radius * Math.cos(phi)
 
-      sizes[i] = Math.random() * 2 + 0.5
-      twinkleSpeeds[i] = Math.random() * 3 + 1
-      twinkleOffsets[i] = Math.random() * Math.PI * 2
+      sizes[i] = random() * 2 + 0.5
+      twinkleSpeeds[i] = random() * 3 + 1
+      twinkleOffsets[i] = random() * Math.PI * 2
     }
 
     return [positions, sizes, twinkleSpeeds, twinkleOffsets]
   }, [count])
 
   useFrame((state) => {
-    uniformsRef.current.uTime.value = state.clock.elapsedTime
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
+    }
     if (ref.current) {
       ref.current.rotation.y += 0.0001
     }
@@ -220,9 +225,10 @@ export function Stars({ count = 3000 }) {
         />
       </bufferGeometry>
       <shaderMaterial
+        ref={materialRef}
         vertexShader={starVertexShader}
         fragmentShader={starFragmentShader}
-        uniforms={uniformsRef.current}
+        uniforms={uniforms}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -233,19 +239,23 @@ export function Stars({ count = 3000 }) {
 
 export function Nebula() {
   const ref = useRef()
-  const uniformsRef = useRef({ uTime: { value: 0 } })
+  const materialRef = useRef()
+  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), [])
 
   useFrame((state) => {
-    uniformsRef.current.uTime.value = state.clock.elapsedTime
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
+    }
   })
 
   return (
     <mesh ref={ref} position={[0, 0, -50]}>
       <planeGeometry args={[200, 200]} />
       <shaderMaterial
+        ref={materialRef}
         vertexShader={nebulaVertexShader}
         fragmentShader={nebulaFragmentShader}
-        uniforms={uniformsRef.current}
+        uniforms={uniforms}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}

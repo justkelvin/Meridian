@@ -62,23 +62,24 @@ function Planet({ position, size, color, glowColor, rotationSpeed = 0.001, hasRi
   const planetRef = useRef()
   const glowRef = useRef()
   const ringRef = useRef()
+  const ringMaterialRef = useRef()
 
   const glowUniforms = useMemo(() => ({
     uColor: { value: new THREE.Color(glowColor || color) },
     uIntensity: { value: 1.5 }
   }), [glowColor, color])
 
-  const ringUniforms = useRef({
+  const ringUniforms = useMemo(() => ({
     uColor: { value: new THREE.Color(ringColor || color) },
     uTime: { value: 0 }
-  })
+  }), [ringColor, color])
 
   useFrame((state) => {
     if (planetRef.current) {
       planetRef.current.rotation.y += rotationSpeed
     }
-    if (ringRef.current) {
-      ringUniforms.current.uTime.value = state.clock.elapsedTime
+    if (ringMaterialRef.current) {
+      ringMaterialRef.current.uniforms.uTime.value = state.clock.elapsedTime
     }
   })
 
@@ -115,9 +116,10 @@ function Planet({ position, size, color, glowColor, rotationSpeed = 0.001, hasRi
         <mesh ref={ringRef} rotation={[Math.PI / 2.5, 0, 0]}>
           <ringGeometry args={[size * 1.4, size * 2.2, 64]} />
           <shaderMaterial
+            ref={ringMaterialRef}
             vertexShader={ringVertexShader}
             fragmentShader={ringFragmentShader}
-            uniforms={ringUniforms.current}
+            uniforms={ringUniforms}
             transparent
             side={THREE.DoubleSide}
             depthWrite={false}

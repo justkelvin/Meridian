@@ -59,7 +59,7 @@ export const PERIOD_DISPLAY_NAMES = {
 /**
  * Generate subscription display name with period
  */
-export function generateSubscriptionDisplayName(baseName, period, locale = 'en') {
+export function generateSubscriptionDisplayName(baseName, period, _locale = 'en') {
   const periodInfo = PERIOD_DISPLAY_NAMES[period]
   if (!periodInfo) return baseName
   

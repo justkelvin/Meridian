@@ -21,7 +21,6 @@ import {
   getPricingTiersSummary,
   SUBSCRIPTION_PERIODS,
   generatePricingRecommendations,
-  getTier,
   fetchExchangeRates
 } from '@/services/subscriptionPricingService'
 import {
@@ -148,8 +147,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
 
   // Pricing state
   const [basePrice, setBasePrice] = useState(9.99)
-  const [selectedCountries, setSelectedCountries] = useState(['US', 'GB', 'DE', 'FR', 'JP', 'BR', 'IN'])
-  const [pricingOptions, setPricingOptions] = useState({
+  const [selectedCountries] = useState(['US', 'GB', 'DE', 'FR', 'JP', 'BR', 'IN'])
+  const [pricingOptions] = useState({
     minMultiplier: 0.3,
     maxMultiplier: 1.2,
     roundToNice: true
@@ -171,7 +170,6 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
 
   // Pricing comparison state
   const [currentPrices, setCurrentPrices] = useState([])
-  const [availablePricePoints, setAvailablePricePoints] = useState([])
   const [isLoadingPrices, setIsLoadingPrices] = useState(false)
   const [showPriceComparison, setShowPriceComparison] = useState(false)
   const [priceRecommendations, setPriceRecommendations] = useState(null)
@@ -527,13 +525,6 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
       tier: p.tier
     }))
   }, [selectedPricing])
-
-  // Toggle functions
-  const toggleCountry = (code) => {
-    setSelectedCountries(prev =>
-      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
-    )
-  }
 
   const togglePeriod = (period) => {
     setSelectedPeriods(prev =>
@@ -1395,7 +1386,6 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
               <ScrollArea className="h-[400px]">
                 <div className="space-y-2">
                   {pricingTable.map((p) => {
-                    const tier = p.tier || (p.gdpRatio >= 0.5 ? 'high' : p.gdpRatio >= 0.2 ? 'medium' : 'low')
                     const discount = Math.round((1 - p.multiplier) * 100)
                     
                     return (

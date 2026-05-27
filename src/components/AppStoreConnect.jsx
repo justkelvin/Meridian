@@ -213,22 +213,8 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
   const currentAiApiKey = aiConfig.apiKeys[aiConfig.provider] || ''
   const currentAiModel = aiConfig.models[aiConfig.provider] || PROVIDERS[aiConfig.provider]?.defaultModel || ''
 
-  // Auto-connect on mount if we have a valid cached JWT token
-  useEffect(() => {
-    const canAutoConnect = credentials.keyId && credentials.issuerId && hasValidToken(credentials.keyId, credentials.issuerId)
-    
-    if (canAutoConnect && apps.length === 0 && !isConnecting && !isLoadingApps) {
-      console.log('[Auto-connect] Valid JWT found, connecting automatically...')
-      // Small delay to let the UI render first
-      const timer = setTimeout(() => {
-        handleAutoConnect()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, []) // Run once on mount
-
   // Auto-connect function (doesn't show error toasts on failure)
-  const handleAutoConnect = async () => {
+  const handleAutoConnect = useCallback(async () => {
     setIsConnecting(true)
     try {
       const result = await testConnection(credentials)
@@ -280,7 +266,21 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
       console.log('[Auto-connect] Failed:', error.message)
     }
     setIsConnecting(false)
-  }
+  }, [addLog, credentials])
+
+  // Auto-connect on mount if we have a valid cached JWT token
+  useEffect(() => {
+    const canAutoConnect = credentials.keyId && credentials.issuerId && hasValidToken(credentials.keyId, credentials.issuerId)
+
+    if (canAutoConnect && apps.length === 0 && !isConnecting && !isLoadingApps) {
+      console.log('[Auto-connect] Valid JWT found, connecting automatically...')
+      // Small delay to let the UI render first
+      const timer = setTimeout(() => {
+        handleAutoConnect()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [apps.length, credentials.issuerId, credentials.keyId, handleAutoConnect, isConnecting, isLoadingApps])
 
   // Test connection
   const handleTestConnection = async () => {
@@ -1121,7 +1121,7 @@ Respond with ONLY the keywords, nothing else:`
 
   // Get the current value for an app info field (edited or original)
   const getAppInfoValue = (loc, field) => {
-    if (editedAppInfo[loc.id]?.hasOwnProperty(field)) {
+    if (Object.prototype.hasOwnProperty.call(editedAppInfo[loc.id] || {}, field)) {
       return editedAppInfo[loc.id][field]
     }
     return loc[field] || ''
@@ -1129,7 +1129,7 @@ Respond with ONLY the keywords, nothing else:`
 
   // Check if a specific field is edited
   const isFieldEdited = (locId, field) => {
-    return editedAppInfo[locId]?.hasOwnProperty(field)
+    return Object.prototype.hasOwnProperty.call(editedAppInfo[locId] || {}, field)
   }
 
   // Check if there are any unsaved app info changes
@@ -1791,7 +1791,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                         <TableBody>
                           {appInfoLocalizations.localizations.map(loc => {
                             const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                            const hasAnyEdit = editedAppInfo.hasOwnProperty(loc.id)
+                            const hasAnyEdit = Object.prototype.hasOwnProperty.call(editedAppInfo, loc.id)
                             const isSource = loc.locale === sourceLocale
                             const isTranslatingThis = isTranslatingAppInfo === loc.locale
                             return (

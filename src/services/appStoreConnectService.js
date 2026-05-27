@@ -183,7 +183,7 @@ async function apiRequest(endpoint, token, options = {}) {
   if (text) {
     try {
       data = JSON.parse(text)
-    } catch (e) {
+    } catch {
       // Not JSON, that's ok for some responses
     }
   }

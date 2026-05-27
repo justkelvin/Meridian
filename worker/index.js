@@ -13,7 +13,7 @@ const ALLOWED_ORIGINS = [
 ]
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, _env, _ctx) {
     const origin = request.headers.get('Origin')
     const url = new URL(request.url)
 

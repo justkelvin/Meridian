@@ -1,7 +1,8 @@
-import { useRef, useMemo, useState, useEffect } from 'react'
+import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { createSeededRandom } from './random'
 
 // Language samples with their native scripts
 const LANGUAGES = [
@@ -67,12 +68,14 @@ const particleFragmentShader = `
 // Single flying text component
 function FlyingText({ text, initialPosition, speed, delay, color }) {
   const ref = useRef()
-  const [position, setPosition] = useState(initialPosition)
-  const [opacity, setOpacity] = useState(0)
-  const startTime = useRef(Date.now() + delay * 1000)
+  const startTime = useRef(null)
 
-  useFrame(() => {
-    const elapsed = (Date.now() - startTime.current) / 1000
+  useFrame((state) => {
+    if (startTime.current === null) {
+      startTime.current = state.clock.elapsedTime + delay
+    }
+
+    const elapsed = state.clock.elapsedTime - startTime.current
 
     if (elapsed < 0) return
 
@@ -97,20 +100,20 @@ function FlyingText({ text, initialPosition, speed, delay, color }) {
 
     // Reset when reached center
     if (progress > 0.95) {
-      startTime.current = Date.now()
+      startTime.current = state.clock.elapsedTime
     }
   })
 
   return (
     <Text
       ref={ref}
-      position={position}
+      position={initialPosition}
       fontSize={0.8}
       color={color}
       anchorX="center"
       anchorY="middle"
       material-transparent={true}
-      material-opacity={opacity}
+      material-opacity={0}
       material-depthWrite={false}
     >
       {text}
@@ -123,6 +126,7 @@ function SpeedLines({ count = 100 }) {
   const ref = useRef()
 
   const [positions, sizes, speeds, colors] = useMemo(() => {
+    const random = createSeededRandom(count * 17)
     const positions = new Float32Array(count * 3)
     const sizes = new Float32Array(count)
     const speeds = new Float32Array(count)
@@ -137,18 +141,18 @@ function SpeedLines({ count = 100 }) {
 
     for (let i = 0; i < count; i++) {
       // Start from edges, pointing toward center
-      const angle = Math.random() * Math.PI * 2
-      const radius = 15 + Math.random() * 20
-      const height = (Math.random() - 0.5) * 15
+      const angle = random() * Math.PI * 2
+      const radius = 15 + random() * 20
+      const height = (random() - 0.5) * 15
 
       positions[i * 3] = Math.cos(angle) * radius
       positions[i * 3 + 1] = height
-      positions[i * 3 + 2] = -30 - Math.random() * 40
+      positions[i * 3 + 2] = -30 - random() * 40
 
-      sizes[i] = Math.random() * 2 + 0.5
-      speeds[i] = Math.random() * 0.15 + 0.08
+      sizes[i] = random() * 2 + 0.5
+      speeds[i] = random() * 0.15 + 0.08
 
-      const color = colorOptions[Math.floor(Math.random() * colorOptions.length)]
+      const color = colorOptions[Math.floor(random() * colorOptions.length)]
       colors[i * 3] = color.r
       colors[i * 3 + 1] = color.g
       colors[i * 3 + 2] = color.b
@@ -157,7 +161,7 @@ function SpeedLines({ count = 100 }) {
     return [positions, sizes, speeds, colors]
   }, [count])
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!ref.current) return
 
     const positionAttr = ref.current.geometry.attributes.position
@@ -218,26 +222,27 @@ function SpeedLines({ count = 100 }) {
 // Flying language texts
 function FlyingLanguages() {
   const texts = useMemo(() => {
+    const random = createSeededRandom(9001)
     const items = []
     const colorOptions = ['#9b6dff', '#4ecdc4', '#ff6b9d', '#64b5f6', '#b794f6']
 
-    LANGUAGES.forEach((lang, i) => {
+    LANGUAGES.forEach((lang) => {
       // Create multiple instances of each language
       for (let j = 0; j < 2; j++) {
-        const angle = Math.random() * Math.PI * 2
-        const radius = 8 + Math.random() * 12
-        const height = (Math.random() - 0.5) * 10
+        const angle = random() * Math.PI * 2
+        const radius = 8 + random() * 12
+        const height = (random() - 0.5) * 10
 
         items.push({
           text: lang.text,
           position: [
             Math.cos(angle) * radius,
             height,
-            -25 - Math.random() * 30
+            -25 - random() * 30
           ],
-          speed: 0.15 + Math.random() * 0.1,
-          delay: Math.random() * 5,
-          color: colorOptions[Math.floor(Math.random() * colorOptions.length)],
+          speed: 0.15 + random() * 0.1,
+          delay: random() * 5,
+          color: colorOptions[Math.floor(random() * colorOptions.length)],
           key: `${lang.lang}-${j}`
         })
       }

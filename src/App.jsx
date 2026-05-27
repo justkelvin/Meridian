@@ -187,9 +187,9 @@ function App() {
   });
   const [stats, setStats] = useState(null);
   const [logs, setLogs] = useState([]);
-  const [screenshotHeadlineKey, setScreenshotHeadlineKey] = useState("");
-  const [screenshotSubheadlineKey, setScreenshotSubheadlineKey] = useState("");
-  const [screenshotApplyAll, setScreenshotApplyAll] = useState(true);
+  const [screenshotHeadlineKey] = useState("");
+  const [screenshotSubheadlineKey] = useState("");
+  const [screenshotApplyAll] = useState(true);
 
   // Editor state
   const [editDialog, setEditDialog] = useState({
@@ -568,12 +568,6 @@ function App() {
     const languages = fromStats.length ? fromStats : [baseLang];
     return Array.from(new Set(languages));
   }, [stats, xcstringsData]);
-
-  const screenshotKeyOptions = useMemo(() => {
-    return xcstringsData?.strings
-      ? Object.keys(xcstringsData.strings).sort()
-      : [];
-  }, [xcstringsData]);
 
   const screenshotLocalizationPayload = useMemo(() => {
     if (!screenshotLanguages.length) return null;

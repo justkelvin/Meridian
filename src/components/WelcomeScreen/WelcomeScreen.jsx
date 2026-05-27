@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Preload } from '@react-three/drei'
 import * as THREE from 'three'
@@ -12,8 +12,13 @@ import WelcomeOverlay from './WelcomeOverlay'
 // Camera controller with subtle mouse parallax
 function CameraController() {
   const { camera } = useThree()
+  const cameraRef = useRef(camera)
   const mouseRef = useRef({ x: 0, y: 0 })
   const targetRef = useRef({ x: 0, y: 0 })
+
+  useEffect(() => {
+    cameraRef.current = camera
+  }, [camera])
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -31,9 +36,10 @@ function CameraController() {
     targetRef.current.y += (mouseRef.current.y - targetRef.current.y) * 0.02
 
     // Apply subtle camera movement
-    camera.position.x = targetRef.current.x * 1.5
-    camera.position.y = targetRef.current.y * 1
-    camera.lookAt(0, 0, 0)
+    const activeCamera = cameraRef.current
+    activeCamera.position.x = targetRef.current.x * 1.5
+    activeCamera.position.y = targetRef.current.y * 1
+    activeCamera.lookAt(0, 0, 0)
   })
 
   return null
@@ -95,6 +101,13 @@ export default function WelcomeScreen({ onComplete }) {
   const [isExiting, setIsExiting] = useState(false)
   const containerRef = useRef()
 
+  const handleGetStarted = useCallback(() => {
+    setIsExiting(true)
+    setTimeout(() => {
+      onComplete()
+    }, 800)
+  }, [onComplete])
+
   useEffect(() => {
     // Simulate loading time for assets
     const timer = setTimeout(() => setIsLoading(false), 1500)
@@ -111,14 +124,7 @@ export default function WelcomeScreen({ onComplete }) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  const handleGetStarted = () => {
-    setIsExiting(true)
-    setTimeout(() => {
-      onComplete()
-    }, 800)
-  }
+  }, [handleGetStarted])
 
   return (
     <div
