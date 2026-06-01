@@ -220,8 +220,8 @@ export function AppSidebar({
     <Sidebar variant="inset" collapsible="offcanvas">
       <SidebarHeader className="border-b border-sidebar-border/50 bg-gradient-to-b from-sidebar to-sidebar/80">
         <div className="flex items-center gap-3 px-3 py-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
-            <Globe className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/90 shadow-lg shadow-primary/25">
+            <Globe className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight">Localizer</span>
@@ -434,8 +434,8 @@ export function AppSidebar({
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/10">
-                    <Sparkles className="h-4 w-4 text-violet-500" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                    <Sparkles className="h-4 w-4 text-primary" />
                   </div>
                   <span className="font-medium">AI Provider</span>
                 </div>
@@ -556,12 +556,12 @@ export function AppSidebar({
                 {/* Status */}
                 <div className="pt-1">
                   {currentApiKey ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="text-xs font-medium">Ready to translate</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 text-amber-500">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 text-warning">
                       <AlertCircle className="h-4 w-4" />
                       <span className="text-xs font-medium">API key required</span>
                     </div>
@@ -580,8 +580,8 @@ export function AppSidebar({
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
-                    <Key className="h-4 w-4 text-blue-500" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-info/10">
+                    <Key className="h-4 w-4 text-info" />
                   </div>
                   <span className="font-medium">App Store Connect</span>
                 </div>
@@ -595,7 +595,7 @@ export function AppSidebar({
                   href="https://appstoreconnect.apple.com/access/integrations/api"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-medium hover:bg-blue-500/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 text-info text-xs font-medium hover:bg-info/20 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   <span>Get API Key from Apple</span>
@@ -640,7 +640,7 @@ export function AppSidebar({
                       ${isDraggingKey
                         ? 'border-primary bg-primary/10 text-primary scale-[1.02]'
                         : ascCredentials.privateKey
-                          ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500'
+                          ? 'border-success/50 bg-success/10 text-success'
                           : 'border-border/50 hover:border-primary/50 hover:bg-muted/30 text-muted-foreground'
                       }
                     `}
@@ -781,7 +781,7 @@ export function AppSidebar({
                 {/* Status & Clear */}
                 <div className="flex items-center justify-between pt-2">
                   {ascCredentials.keyId && ascCredentials.issuerId && ascCredentials.privateKey ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 flex-1">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success flex-1">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="text-xs font-medium">Ready to connect</span>
                     </div>
@@ -831,8 +831,8 @@ export function AppSidebar({
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-500/10">
-                    <Play className="h-4 w-4 text-green-500" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10">
+                    <Play className="h-4 w-4 text-success" />
                   </div>
                   <span className="font-medium">Google Play</span>
                 </div>
@@ -846,7 +846,7 @@ export function AppSidebar({
                   href="https://developers.google.com/android-publisher/getting_started"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium hover:bg-green-500/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success text-xs font-medium hover:bg-success/20 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   <span>Setup Guide</span>
@@ -884,10 +884,10 @@ export function AppSidebar({
                     className={`
                       flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 text-xs
                       ${isDraggingGpKey
-                        ? 'border-green-500 bg-green-500/10 text-green-500 scale-[1.02]'
+                        ? 'border-success bg-success/10 text-success scale-[1.02]'
                         : gpCredentials?.serviceAccountJson
-                          ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500'
-                          : 'border-border/50 hover:border-green-500/50 hover:bg-muted/30 text-muted-foreground'
+                          ? 'border-success/50 bg-success/10 text-success'
+                          : 'border-border/50 hover:border-success/50 hover:bg-muted/30 text-muted-foreground'
                       }
                     `}
                   >
@@ -913,7 +913,7 @@ export function AppSidebar({
                 {/* Status & Clear */}
                 <div className="flex items-center justify-between pt-2">
                   {gpCredentials?.serviceAccountJson ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 flex-1">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success flex-1">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="text-xs font-medium">Ready to connect</span>
                     </div>
@@ -1000,7 +1000,7 @@ export function AppSidebar({
           
           <div className="flex items-center justify-center gap-2">
             <span className="text-xs text-muted-foreground">Crafted with</span>
-            <span className="text-red-500">♥</span>
+            <span className="text-destructive">♥</span>
             <span className="text-xs text-muted-foreground">by</span>
             <span className="text-xs font-semibold text-foreground">Fayhe</span>
           </div>

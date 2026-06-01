@@ -680,12 +680,12 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl gradient-card border border-border/50 p-8 shadow-xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-success/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
-                <DollarSign className="h-6 w-6 text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-success to-success/90 shadow-lg">
+                <DollarSign className="h-6 w-6 text-success-foreground" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Subscriptions</h1>
@@ -698,7 +698,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
           </div>
           <div className="flex gap-4">
             <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-              <div className="text-2xl font-bold text-emerald-500">{Object.keys(GDP_PER_CAPITA).length}</div>
+              <div className="text-2xl font-bold text-success">{Object.keys(GDP_PER_CAPITA).length}</div>
               <div className="text-xs text-muted-foreground">Markets</div>
             </div>
             <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
@@ -711,7 +711,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
 
       {/* Error Display */}
       {error && (
-        <div className="flex items-center gap-2 p-4 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20">
+        <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <span className="text-sm">{error}</span>
           <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setError(null)}>
@@ -743,8 +743,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             <Card className="border-border/50 shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 mb-4">
-                    <AlertCircle className="h-8 w-8 text-amber-500" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-warning/10 mb-4">
+                    <AlertCircle className="h-8 w-8 text-warning" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2">App Store Connect Not Configured</h3>
                   <p className="text-muted-foreground max-w-md mb-4">
@@ -757,8 +757,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             <Card className="border-border/50 shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 mb-4">
-                    <Lock className="h-8 w-8 text-blue-500" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-info/10 mb-4">
+                    <Lock className="h-8 w-8 text-info" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2">Unlock Your Private Key</h3>
                   <p className="text-muted-foreground max-w-md mb-4">
@@ -780,9 +780,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       {isUnlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Unlock'}
                     </Button>
                   </div>
-                  {unlockError && <p className="text-sm text-red-500 mt-2">{unlockError}</p>}
+                  {unlockError && <p className="text-sm text-destructive mt-2">{unlockError}</p>}
                   {sessionTimeLeft > 0 && (
-                    <div className="flex items-center gap-2 mt-4 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 text-sm">
+                    <div className="flex items-center gap-2 mt-4 px-3 py-2 rounded-lg bg-success/10 text-success text-sm">
                       <Clock className="h-4 w-4" />
                       <span>Session active: {formatTimeLeft(sessionTimeLeft)}</span>
                       <Button 
@@ -802,8 +802,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             <Card className="border-border/50 shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 mb-4">
-                    <AlertCircle className="h-8 w-8 text-amber-500" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-warning/10 mb-4">
+                    <AlertCircle className="h-8 w-8 text-warning" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2">Private Key Required</h3>
                   <p className="text-muted-foreground max-w-md mb-4">
@@ -832,7 +832,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       )}
                     </Button>
                     {sessionTimeLeft > 0 && !hasPrivateKey && (
-                      <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 text-sm font-mono">
+                      <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-success/10 text-success text-sm font-mono">
                         <Clock className="h-4 w-4" />
                         {formatTimeLeft(sessionTimeLeft)}
                       </div>
@@ -1074,8 +1074,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                      <DollarSign className="h-5 w-5 text-emerald-500" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+                      <DollarSign className="h-5 w-5 text-success" />
                     </div>
                     <div>
                       <CardTitle className="text-lg">Price Optimization</CardTitle>
@@ -1102,16 +1102,16 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
               {showPriceComparison && (
                 <CardContent>
                   {/* US Base Price Info */}
-                  <div className="mb-4 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <div className="mb-4 p-4 rounded-lg bg-success/10 border border-success/20">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">🇺🇸</span>
                         <span className="font-medium">Base Price (USA)</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-emerald-500">${basePrice.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-success">${basePrice.toFixed(2)}</span>
                         {currentPrices.length === 0 && (
-                          <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">
+                          <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
                             Using default
                           </Badge>
                         )}
@@ -1142,9 +1142,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                             <div 
                               key={p.countryCode} 
                               className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                                isOverpriced ? 'border-amber-500/30 bg-amber-500/5' :
-                                isUnderpriced ? 'border-blue-500/30 bg-blue-500/5' :
-                                isOptimal ? 'border-emerald-500/30 bg-emerald-500/5' :
+                                isOverpriced ? 'border-warning/30 bg-warning/5' :
+                                isUnderpriced ? 'border-info/30 bg-info/5' :
+                                isOptimal ? 'border-success/30 bg-success/5' :
                                 'border-border/50 hover:bg-muted/30'
                               }`}
                             >
@@ -1167,7 +1167,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                                       <p className="font-semibold">${p.currentPriceUSD?.toFixed(2)}</p>
                                       <p className="text-xs text-muted-foreground">{p.symbol}{p.currentPriceLocal.toFixed(2)}</p>
                                       {p.scheduledDate && (
-                                        <p className="text-xs text-purple-500 flex items-center gap-1">
+                                        <p className="text-xs text-primary flex items-center gap-1">
                                           <Clock className="h-3 w-3" />
                                           {p.symbol}{p.scheduledPrice} on {p.scheduledDate}
                                         </p>
@@ -1184,7 +1184,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                                 {/* Recommended Price */}
                                 <div className="text-right min-w-[90px]">
                                   <p className="text-xs text-muted-foreground">Recommended</p>
-                                  <p className="font-semibold text-emerald-500">
+                                  <p className="font-semibold text-success">
                                     ${p.recommendedPriceUSD.toFixed(2)}
                                   </p>
                                   <p className="text-xs text-muted-foreground">{p.localPriceFormatted}</p>
@@ -1194,10 +1194,10 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                                 <Badge 
                                   variant="outline" 
                                   className={`min-w-[80px] justify-center ${
-                                    !p.currentPriceUSD ? 'bg-gray-500/10 text-gray-500 border-gray-500/20' :
-                                    isOverpriced ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                    isUnderpriced ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                    'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                    !p.currentPriceUSD ? 'bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20' :
+                                    isOverpriced ? 'bg-warning/10 text-warning border-warning/20' :
+                                    isUnderpriced ? 'bg-info/10 text-info border-info/20' :
+                                    'bg-success/10 text-success border-success/20'
                                   }`}
                                 >
                                   {!p.currentPriceUSD ? 'No price' :
@@ -1238,8 +1238,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                   {/* Summary */}
                   {priceRecommendations && priceRecommendations.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-3 gap-4 text-center">
-                    <div className="p-3 rounded-lg bg-emerald-500/10">
-                      <p className="text-2xl font-bold text-emerald-500">
+                    <div className="p-3 rounded-lg bg-success/10">
+                      <p className="text-2xl font-bold text-success">
                         {priceRecommendations.filter(p => {
                           if (!p.currentPriceUSD || p.countryCode === 'US') return false
                           const diff = Math.abs((p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100)
@@ -1248,8 +1248,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       </p>
                       <p className="text-xs text-muted-foreground">Optimal</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-amber-500/10">
-                      <p className="text-2xl font-bold text-amber-500">
+                    <div className="p-3 rounded-lg bg-warning/10">
+                      <p className="text-2xl font-bold text-warning">
                         {priceRecommendations.filter(p => {
                           if (!p.currentPriceUSD || p.countryCode === 'US') return false
                           const diff = (p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100
@@ -1258,8 +1258,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       </p>
                       <p className="text-xs text-muted-foreground">Overpriced</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-500/10">
-                      <p className="text-2xl font-bold text-gray-500">
+                    <div className="p-3 rounded-lg bg-muted-foreground/10">
+                      <p className="text-2xl font-bold text-muted-foreground">
                         {priceRecommendations.filter(p => !p.currentPriceUSD && p.countryCode !== 'US').length}
                       </p>
                       <p className="text-xs text-muted-foreground">Not Set</p>
@@ -1276,11 +1276,11 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
         {/* Pricing Tab */}
         <TabsContent value="pricing" className="space-y-6">
           {/* Explanation Card */}
-          <Card className="border-border/50 shadow-sm bg-gradient-to-r from-emerald-500/5 to-blue-500/5">
+          <Card className="border-border/50 shadow-sm bg-gradient-to-r from-success/5 to-info/5">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 shrink-0">
-                  <TrendingUp className="h-6 w-6 text-emerald-500" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 shrink-0">
+                  <TrendingUp className="h-6 w-6 text-success" />
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">GDP-Based Price Optimization</h3>
@@ -1299,8 +1299,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             <Card className="border-border/50 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                    <DollarSign className="h-5 w-5 text-emerald-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+                    <DollarSign className="h-5 w-5 text-success" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">Base Price (USA)</CardTitle>
@@ -1335,7 +1335,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                     {isLoadingGDP ? 'Loading rates...' : 'Refresh Exchange Rates'}
                   </Button>
                   {isLiveData && (
-                    <p className="text-xs text-emerald-500 mt-2 text-center">
+                    <p className="text-xs text-success mt-2 text-center">
                       ✓ Live exchange rates loaded
                     </p>
                   )}
@@ -1407,7 +1407,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                           {/* Recommended USD Price */}
                           <div className="text-right">
                             <p className="text-sm text-muted-foreground">Recommended</p>
-                            <p className="font-semibold text-emerald-500">
+                            <p className="font-semibold text-success">
                               ${(p.recommendedPriceUSD || p.price || 0).toFixed(2)}
                             </p>
                           </div>
@@ -1425,9 +1425,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                             variant="outline" 
                             className={`min-w-[60px] justify-center ${
                               discount > 0 
-                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' 
+                                ? 'bg-info/10 text-info border-info/20' 
                                 : discount < 0 
-                                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                  ? 'bg-warning/10 text-warning border-warning/20'
                                   : 'bg-muted text-muted-foreground'
                             }`}
                           >
@@ -1456,9 +1456,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className={`capitalize ${
-                        tier === 'high' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                        tier === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                        'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                        tier === 'high' ? 'bg-success/10 text-success border-success/20' :
+                        tier === 'medium' ? 'bg-warning/10 text-warning border-warning/20' :
+                        'bg-info/10 text-info border-info/20'
                       }`}>
                         {tier === 'high' ? '💰 High GDP' : tier === 'medium' ? '📊 Medium GDP' : '🌍 Low GDP'}
                       </Badge>
@@ -1484,7 +1484,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                               <span>{p.flag || '🌍'}</span>
                               <span>{p.countryName}</span>
                             </div>
-                            <span className="font-mono text-emerald-500">${(p.recommendedPriceUSD || p.price || 0).toFixed(2)}</span>
+                            <span className="font-mono text-success">${(p.recommendedPriceUSD || p.price || 0).toFixed(2)}</span>
                           </div>
                         ))}
                       </div>
@@ -1504,8 +1504,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             <Card className="border-border/50 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
-                    <Sparkles className="h-5 w-5 text-violet-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <Sparkles className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">Subscription Metadata</CardTitle>
@@ -1572,8 +1572,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             <Card className="border-border/50 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-                    <Globe className="h-5 w-5 text-blue-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10">
+                    <Globe className="h-5 w-5 text-info" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">Target Languages</CardTitle>
@@ -1616,12 +1616,12 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="flex-1">
                   {!currentApiKey ? (
-                    <div className="flex items-center gap-2 text-amber-500">
+                    <div className="flex items-center gap-2 text-warning">
                       <AlertCircle className="h-5 w-5" />
                       <span>Configure your AI provider in the sidebar</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-emerald-500">
+                    <div className="flex items-center gap-2 text-success">
                       <CheckCircle2 className="h-5 w-5" />
                       <span>Ready: {selectedPeriods.length} periods × {selectedLocales.length} languages</span>
                     </div>

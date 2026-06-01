@@ -13,10 +13,12 @@ import {
 } from 'recharts'
 
 const TIER_COLORS = {
-  high: '#10b981',   // emerald-500
-  medium: '#f59e0b', // amber-500
-  low: '#3b82f6'     // blue-500
+  high: 'var(--success)',
+  medium: 'var(--warning)',
+  low: 'var(--info)'
 }
+
+const colorTint = (color, amount = 12) => `color-mix(in srgb, ${color} ${amount}%, transparent)`
 
 const CustomTooltip = ({ active, payload, label: _label }) => {
   if (!active || !payload || !payload.length) return null
@@ -40,7 +42,7 @@ const CustomTooltip = ({ active, payload, label: _label }) => {
           <span 
             className="px-2 py-0.5 rounded text-xs font-medium capitalize"
             style={{ 
-              backgroundColor: `${TIER_COLORS[data.tier]}20`,
+              backgroundColor: colorTint(TIER_COLORS[data.tier]),
               color: TIER_COLORS[data.tier]
             }}
           >
@@ -91,35 +93,35 @@ export default function PricingChart({ data, basePrice }) {
         >
           <CartesianGrid 
             strokeDasharray="3 3" 
-            stroke="hsl(var(--border))" 
+            stroke="var(--border)" 
             opacity={0.5}
           />
           <XAxis 
             dataKey="country" 
-            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-            tickLine={{ stroke: 'hsl(var(--border))' }}
-            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+            tickLine={{ stroke: 'var(--border)' }}
+            axisLine={{ stroke: 'var(--border)' }}
             angle={-45}
             textAnchor="end"
             height={60}
           />
           <YAxis 
-            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-            tickLine={{ stroke: 'hsl(var(--border))' }}
-            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+            tickLine={{ stroke: 'var(--border)' }}
+            axisLine={{ stroke: 'var(--border)' }}
             tickFormatter={(value) => `$${value}`}
             domain={[0, 'auto']}
           />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine 
             y={basePrice} 
-            stroke="hsl(var(--primary))" 
+            stroke="var(--primary)" 
             strokeDasharray="5 5"
             strokeWidth={2}
             label={{ 
               value: `Base: $${basePrice}`, 
               position: 'right',
-              fill: 'hsl(var(--primary))',
+              fill: 'var(--primary)',
               fontSize: 12
             }}
           />
@@ -166,37 +168,37 @@ export function GDPComparisonChart({ data }) {
       >
         <CartesianGrid 
           strokeDasharray="3 3" 
-          stroke="hsl(var(--border))" 
+          stroke="var(--border)" 
           opacity={0.5}
           horizontal={false}
         />
         <XAxis 
           type="number"
-          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-          tickLine={{ stroke: 'hsl(var(--border))' }}
-          axisLine={{ stroke: 'hsl(var(--border))' }}
+          tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+          tickLine={{ stroke: 'var(--border)' }}
+          axisLine={{ stroke: 'var(--border)' }}
           tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
           domain={[0, 'auto']}
         />
         <YAxis 
           type="category"
           dataKey="name"
-          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-          tickLine={{ stroke: 'hsl(var(--border))' }}
-          axisLine={{ stroke: 'hsl(var(--border))' }}
+          tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+          tickLine={{ stroke: 'var(--border)' }}
+          axisLine={{ stroke: 'var(--border)' }}
           width={70}
         />
         <Tooltip 
           formatter={(value) => [`${(value * 100).toFixed(1)}%`, 'GDP Ratio']}
           contentStyle={{
-            backgroundColor: 'hsl(var(--popover))',
-            border: '1px solid hsl(var(--border))',
+            backgroundColor: 'var(--popover)',
+            border: '1px solid var(--border)',
             borderRadius: '8px'
           }}
         />
         <ReferenceLine 
           x={1} 
-          stroke="hsl(var(--primary))" 
+          stroke="var(--primary)" 
           strokeDasharray="5 5"
           strokeWidth={2}
         />
@@ -237,7 +239,7 @@ export function PriceDistributionChart({ data }) {
       {distribution.map(item => (
         <div key={item.name} className="text-center">
           <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-lg mb-2"
+            className="w-16 h-16 rounded-full flex items-center justify-center text-background font-bold text-lg mb-2"
             style={{ backgroundColor: item.color }}
           >
             {item.value}

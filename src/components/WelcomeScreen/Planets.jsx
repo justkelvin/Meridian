@@ -134,50 +134,50 @@ function Planet({ position, size, color, glowColor, rotationSpeed = 0.001, hasRi
 export default function Planets() {
   return (
     <group>
-      {/* Large peach/coral planet with rings - top right */}
+      {/* Large light planet with rings - top right */}
       <Planet
         position={[35, 20, -40]}
         size={8}
-        color="#E8A87C"
-        glowColor="#FFD4B8"
+        color="#9999a1"
+        glowColor="#e6e6e9"
         rotationSpeed={0.0005}
         hasRing={true}
-        ringColor="#FFECD2"
+        ringColor="#f4f4f6"
       />
 
-      {/* Small mint/seafoam planet - bottom left */}
+      {/* Small granite planet - bottom left */}
       <Planet
         position={[-40, -25, -50]}
         size={4}
-        color="#41B3A3"
-        glowColor="#85DCBA"
+        color="#66666e"
+        glowColor="#9999a1"
         rotationSpeed={0.002}
       />
 
-      {/* Tiny rose/blush planet - far right */}
+      {/* Tiny alabaster planet - far right */}
       <Planet
         position={[50, -10, -60]}
         size={2}
-        color="#E27D60"
-        glowColor="#F8B4B4"
+        color="#e6e6e9"
+        glowColor="#f4f4f6"
         rotationSpeed={0.003}
       />
 
-      {/* Medium lavender planet - top left background */}
+      {/* Medium dim planet - top left background */}
       <Planet
         position={[-55, 30, -70]}
         size={6}
-        color="#C38D9E"
-        glowColor="#E8B4CB"
+        color="#66666e"
+        glowColor="#9999a1"
         rotationSpeed={0.001}
       />
 
-      {/* Small sky blue planet - bottom right */}
+      {/* Small platinum planet - bottom right */}
       <Planet
         position={[45, -30, -55]}
         size={3}
-        color="#5AB9EA"
-        glowColor="#A8D8EA"
+        color="#f4f4f6"
+        glowColor="#e6e6e9"
         rotationSpeed={0.0015}
       />
     </group>

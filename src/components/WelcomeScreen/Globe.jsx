@@ -54,7 +54,7 @@ function Sparkles({ radius, count = 80 }) {
       </bufferGeometry>
       <pointsMaterial
         size={0.06}
-        color="#ffffff"
+        color="#f4f4f6"
         transparent
         opacity={0.7}
         sizeAttenuation
@@ -80,7 +80,7 @@ function FloatingShapes({ radius }) {
         scale: 0.08 + random() * 0.08,
         speed: 0.3 + random() * 0.3,
         phase: random() * Math.PI * 2,
-        color: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'][Math.floor(random() * 4)]
+        color: ['#f4f4f6', '#e6e6e9', '#9999a1', '#66666e'][Math.floor(random() * 4)]
       })
     }
     return items
@@ -142,7 +142,7 @@ export default function Globe({ radius = 3 }) {
         <mesh>
           <sphereGeometry args={[radius, 64, 64]} />
           <meshBasicMaterial
-            color="#4ECDC4"
+            color="#9999a1"
             transparent
             opacity={0.15}
             blending={THREE.AdditiveBlending}

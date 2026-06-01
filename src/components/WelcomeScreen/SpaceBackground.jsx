@@ -33,7 +33,7 @@ const starFragmentShader = `
     float alpha = (1.0 - dist * 2.0) * (0.5 + twinkle * 0.5);
 
     vec3 coreColor = vec3(1.0, 1.0, 1.0);
-    vec3 glowColor = vec3(0.7, 0.8, 1.0);
+    vec3 glowColor = vec3(0.6, 0.6, 0.63);
     vec3 color = mix(glowColor, coreColor, 1.0 - dist * 2.0);
 
     gl_FragColor = vec4(color, alpha);
@@ -138,17 +138,14 @@ const nebulaFragmentShader = `
     float noise2 = fbm(vec3(uv * 2.0 + 100.0, uTime * 0.015));
     float noise3 = fbm(vec3(uv * 3.0 + 200.0, uTime * 0.01));
 
-    // Purple nebula
-    vec3 purple = vec3(0.4, 0.1, 0.6);
-    // Cyan nebula
-    vec3 cyan = vec3(0.1, 0.4, 0.6);
-    // Pink nebula
-    vec3 pink = vec3(0.6, 0.2, 0.5);
+    vec3 graphite = vec3(0.4, 0.4, 0.43);
+    vec3 granite = vec3(0.6, 0.6, 0.63);
+    vec3 platinum = vec3(0.96, 0.96, 0.96);
 
     vec3 color = vec3(0.0);
-    color += purple * smoothstep(-0.2, 0.8, noise1) * 0.3;
-    color += cyan * smoothstep(-0.1, 0.9, noise2) * 0.2;
-    color += pink * smoothstep(0.0, 1.0, noise3) * 0.15;
+    color += graphite * smoothstep(-0.2, 0.8, noise1) * 0.3;
+    color += granite * smoothstep(-0.1, 0.9, noise2) * 0.2;
+    color += platinum * smoothstep(0.0, 1.0, noise3) * 0.08;
 
     float alpha = (noise1 + noise2 + noise3) * 0.15 + 0.05;
     alpha = clamp(alpha, 0.0, 0.4);
@@ -270,7 +267,7 @@ export default function SpaceBackground() {
       <Stars count={4000} />
       <Nebula />
       {/* Deep space ambient color */}
-      <color attach="background" args={['#050510']} />
+      <color attach="background" args={['#000000']} />
     </group>
   )
 }

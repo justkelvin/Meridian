@@ -10,10 +10,10 @@ styleSheet.textContent = `
   }
   @keyframes glow-pulse {
     0%, 100% {
-      filter: drop-shadow(0 0 10px rgba(208, 188, 255, 0.6)) drop-shadow(0 0 30px rgba(208, 188, 255, 0.4));
+      filter: drop-shadow(0 0 10px rgba(244, 244, 246, 0.45)) drop-shadow(0 0 30px rgba(153, 153, 161, 0.3));
     }
     50% {
-      filter: drop-shadow(0 0 20px rgba(79, 195, 186, 0.8)) drop-shadow(0 0 40px rgba(79, 195, 186, 0.5));
+      filter: drop-shadow(0 0 20px rgba(230, 230, 233, 0.7)) drop-shadow(0 0 40px rgba(102, 102, 110, 0.45));
     }
   }
   @keyframes shimmer {
@@ -28,7 +28,7 @@ if (!document.querySelector('#welcome-animations')) {
 
 // CSS for text stroke effect - only for taglines
 const textStrokeStyle = {
-  color: '#ffffff',
+  color: '#f4f4f6',
   fontWeight: 'bold',
   WebkitTextStroke: '0.5px black',
   textShadow: '1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 4px 8px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.4)'
@@ -60,14 +60,14 @@ export default function WelcomeOverlay({ onGetStarted }) {
       <div className="relative text-center px-6 max-w-2xl">
         {/* Title with gradient */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
-          <span className="bg-gradient-to-r from-white via-[#E8DEF8] to-[#D0BCFF] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[var(--mono-platinum)] via-[var(--mono-alabaster-grey)] to-[var(--mono-rosy-granite)] bg-clip-text text-transparent">
             App Store & Play Store
           </span>
           <br />
           <span
             className="bg-clip-text text-transparent"
             style={{
-              backgroundImage: 'linear-gradient(90deg, #D0BCFF, #FFB4AB, #7DD3C0, #D0BCFF)',
+              backgroundImage: 'linear-gradient(90deg, #f4f4f6, #e6e6e9, #9999a1, #f4f4f6)',
               backgroundSize: '300% 100%',
               animation: 'gradient-shift 4s ease infinite, glow-pulse 3s ease-in-out infinite',
               WebkitTextStroke: '1px rgba(255,255,255,0.8)',
@@ -88,10 +88,10 @@ export default function WelcomeOverlay({ onGetStarted }) {
         {/* CTA Button - Material Design 3 style */}
         <button
           onClick={handleGetStarted}
-          className="pointer-events-auto group relative inline-flex items-center gap-2 px-8 py-4 text-lg font-semibold text-[#381E72] rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#D0BCFF]/30"
+          className="pointer-events-auto group relative inline-flex items-center gap-2 px-8 py-4 text-lg font-semibold text-[var(--mono-black)] rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_25px_50px_-12px_rgba(244,244,246,0.3)]"
         >
           {/* Button background with MD3 gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#D0BCFF] via-[#FFB4AB] to-[#7DD3C0] opacity-90 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--mono-platinum)] via-[var(--mono-alabaster-grey)] to-[var(--mono-rosy-granite)] opacity-90 group-hover:opacity-100 transition-opacity" />
 
           {/* Animated shine effect */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -99,7 +99,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
           </div>
 
           {/* Glow effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#D0BCFF] via-[#FFB4AB] to-[#7DD3C0] rounded-full blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-[var(--mono-platinum)] via-[var(--mono-alabaster-grey)] to-[var(--mono-rosy-granite)] rounded-full blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
 
           {/* Button content */}
           <span className="relative">Get Started</span>
@@ -128,7 +128,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
             (badge) => (
               <span
                 key={badge}
-                className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white/5 backdrop-blur-sm rounded-full border border-white/10"
+                className="px-3 py-1.5 text-xs font-medium text-[var(--mono-alabaster-grey)] bg-white/5 backdrop-blur-sm rounded-full border border-white/10"
               >
                 {badge}
               </span>
@@ -143,7 +143,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
             href="https://github.com/fayharinn/iOS-App-Distribution-Localizer"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+            className="flex items-center gap-2 text-[var(--mono-rosy-granite)] hover:text-[var(--mono-platinum)] transition-colors group"
           >
             <svg
               className="w-5 h-5"
@@ -160,14 +160,14 @@ export default function WelcomeOverlay({ onGetStarted }) {
           </a>
 
           {/* Divider */}
-          <div className="w-px h-4 bg-gray-600" />
+          <div className="w-px h-4 bg-[var(--mono-dim-grey)]" />
 
           {/* X (Twitter) */}
           <a
             href="https://x.com/fayhecode"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+            className="flex items-center gap-2 text-[var(--mono-rosy-granite)] hover:text-[var(--mono-platinum)] transition-colors group"
           >
             <svg
               className="w-5 h-5"
@@ -183,7 +183,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
         {/* Skip link */}
         <button
           onClick={handleGetStarted}
-          className="pointer-events-auto text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          className="pointer-events-auto text-sm text-muted-foreground hover:text-muted transition-colors"
         >
           Press Enter or click anywhere to continue →
         </button>

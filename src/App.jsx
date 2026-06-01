@@ -699,9 +699,9 @@ function App() {
 
             <div className="ml-auto flex items-center gap-3">
               <ThemeToggle variant="compact" />
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-medium text-emerald-500">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
+                <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                <span className="text-xs font-medium text-success">
                   Local-first
                 </span>
               </div>
@@ -766,7 +766,7 @@ function App() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary shadow-lg">
-                            <Languages className="h-6 w-6 text-white" />
+                            <Languages className="h-6 w-6 text-primary-foreground" />
                           </div>
                           <div>
                             <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -800,7 +800,7 @@ function App() {
                             </div>
                           </div>
                           <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-                            <div className="text-2xl font-bold text-emerald-500">
+                            <div className="text-2xl font-bold text-success">
                               {stats.languages.length}
                             </div>
                             <div className="text-xs text-muted-foreground">
@@ -873,14 +873,14 @@ function App() {
                               </span>
                             </div>
                             {currentApiKey ? (
-                              <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                              <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-success/10 text-success">
                                 <CheckCircle2 className="h-4 w-4" />
                                 <span className="text-sm font-medium">
                                   Ready
                                 </span>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/10 text-amber-500">
+                              <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-warning/10 text-warning">
                                 <AlertCircle className="h-4 w-4" />
                                 <span className="text-sm font-medium">
                                   No API key
@@ -926,7 +926,7 @@ function App() {
                           </div>
                           {testResult && (
                             <div
-                              className={`flex items-center gap-2 px-4 py-3 rounded-lg ${testResult.success ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}
+                              className={`flex items-center gap-2 px-4 py-3 rounded-lg ${testResult.success ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}
                             >
                               {testResult.success ? (
                                 <CheckCircle2 className="h-4 w-4" />
@@ -993,8 +993,8 @@ function App() {
                       <Card className="border-border/50 shadow-sm card-hover">
                         <CardHeader className="pb-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
-                              <Shield className="h-5 w-5 text-amber-500" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10">
+                              <Shield className="h-5 w-5 text-warning" />
                             </div>
                             <div>
                               <CardTitle className="text-lg">
@@ -1034,7 +1034,7 @@ function App() {
                               <button
                                 key={word}
                                 onClick={() => removeProtectedWord(word)}
-                                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background border border-border/50 text-sm font-medium hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-500 transition-all"
+                                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background border border-border/50 text-sm font-medium hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive transition-all"
                               >
                                 {word}
                                 <X className="h-3 w-3 opacity-50 group-hover:opacity-100" />
@@ -1053,8 +1053,8 @@ function App() {
                       <Card className="border-border/50 shadow-sm card-hover">
                         <CardHeader className="pb-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-                              <Upload className="h-5 w-5 text-blue-500" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10">
+                              <Upload className="h-5 w-5 text-info" />
                             </div>
                             <div>
                               <CardTitle className="text-lg">
@@ -1085,17 +1085,17 @@ function App() {
                       isDragging
                         ? "border-primary bg-primary/10 scale-[1.02]"
                         : fileName
-                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          ? "border-success/50 bg-success/5"
                           : "border-border hover:border-primary/50 hover:bg-muted/30"
                     }
                   `}
                           >
                             {fileName ? (
                               <>
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 mb-3">
-                                  <FileText className="h-6 w-6 text-emerald-500" />
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 mb-3">
+                                  <FileText className="h-6 w-6 text-success" />
                                 </div>
-                                <span className="text-sm font-medium text-emerald-500">
+                                <span className="text-sm font-medium text-success">
                                   {fileName}
                                 </span>
                                 <span className="text-xs text-muted-foreground mt-1">
@@ -1140,7 +1140,7 @@ function App() {
                                 </span>
                               </div>
                               {selectedLanguages.length > 0 && (
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-amber-500/10 text-amber-500 ml-auto">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-warning/10 text-warning ml-auto">
                                   <Clock className="h-4 w-4" />
                                   <span className="text-sm font-medium">
                                     {selectedLanguages.reduce((acc, lang) => {
@@ -1163,8 +1163,8 @@ function App() {
                         <CardHeader className="pb-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
-                                <Languages className="h-5 w-5 text-violet-500" />
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                                <Languages className="h-5 w-5 text-primary" />
                               </div>
                               <div>
                                 <CardTitle className="text-lg">
@@ -1214,7 +1214,7 @@ function App() {
                             isSelected
                               ? "border-primary bg-primary/5 shadow-sm"
                               : isComplete
-                                ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50"
+                                ? "border-success/30 bg-success/5 hover:border-success/50"
                                 : "border-border/50 bg-background hover:border-border hover:bg-muted/30"
                           }
                         `}
@@ -1255,8 +1255,8 @@ function App() {
                             text-xs font-medium px-2 py-0.5 rounded-full
                             ${
                               isComplete
-                                ? "bg-emerald-500/10 text-emerald-500"
-                                : "bg-amber-500/10 text-amber-500"
+                                ? "bg-success/10 text-success"
+                                : "bg-warning/10 text-warning"
                             }
                           `}
                                     >
@@ -1279,7 +1279,7 @@ function App() {
                         <CardHeader className="pb-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
-                              <Sparkles className="h-5 w-5 text-white" />
+                              <Sparkles className="h-5 w-5 text-primary-foreground" />
                             </div>
                             <div>
                               <CardTitle className="text-lg">
@@ -1379,8 +1379,8 @@ function App() {
                       <Card className="border-border/50 shadow-sm">
                         <CardHeader className="pb-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10">
-                              <Terminal className="h-5 w-5 text-slate-500" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted-foreground/10">
+                              <Terminal className="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div>
                               <CardTitle className="text-lg">
@@ -1406,18 +1406,18 @@ function App() {
                                     key={index}
                                     className={`flex items-start gap-3 text-sm py-1.5 px-3 rounded-lg transition-colors ${
                                       log.type === "error"
-                                        ? "bg-red-500/10"
+                                        ? "bg-destructive/10"
                                         : log.type === "success"
-                                          ? "bg-emerald-500/10"
+                                          ? "bg-success/10"
                                           : "hover:bg-muted/50"
                                     }`}
                                   >
                                     <span
                                       className={`mt-0.5 ${
                                         log.type === "error"
-                                          ? "text-red-500"
+                                          ? "text-destructive"
                                           : log.type === "success"
-                                            ? "text-emerald-500"
+                                            ? "text-success"
                                             : "text-muted-foreground"
                                       }`}
                                     >
@@ -1435,9 +1435,9 @@ function App() {
                                     <span
                                       className={`break-all ${
                                         log.type === "error"
-                                          ? "text-red-400"
+                                          ? "text-destructive"
                                           : log.type === "success"
-                                            ? "text-emerald-400"
+                                            ? "text-success"
                                             : "text-foreground"
                                       }`}
                                     >
@@ -1607,7 +1607,7 @@ function App() {
                                         ${
                                           translation
                                             ? "bg-muted/50 hover:bg-muted border border-transparent hover:border-border"
-                                            : "bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-500"
+                                            : "bg-warning/10 border border-warning/30 hover:bg-warning/20 text-warning"
                                         }
                                       `}
                                               >

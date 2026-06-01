@@ -1335,12 +1335,12 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl gradient-card border border-border/50 p-8 shadow-xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-info/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
-                <Store className="h-6 w-6 text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-info to-info shadow-lg">
+                <Store className="h-6 w-6 text-info-foreground" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">App Store Connect</h1>
@@ -1355,12 +1355,12 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
           {apps.length > 0 && (
             <div className="flex gap-4">
               <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-                <div className="text-2xl font-bold text-blue-500">{apps.length}</div>
+                <div className="text-2xl font-bold text-info">{apps.length}</div>
                 <div className="text-xs text-muted-foreground">Apps</div>
               </div>
               {selectedVersion && (
                 <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-                  <div className="text-2xl font-bold text-emerald-500">{versionLocalizations.length}</div>
+                  <div className="text-2xl font-bold text-success">{versionLocalizations.length}</div>
                   <div className="text-xs text-muted-foreground">Locales</div>
                 </div>
               )}
@@ -1373,8 +1373,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
       <Card id="asc-connection" className="border-border/50 shadow-sm card-hover scroll-mt-6">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-              <Link2 className="h-5 w-5 text-blue-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10">
+              <Link2 className="h-5 w-5 text-info" />
             </div>
             <div>
               <CardTitle className="text-lg">Connect to App Store</CardTitle>
@@ -1385,39 +1385,39 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
             {credentials.keyId ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Key ID set
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
                 <AlertCircle className="h-3.5 w-3.5" />
                 No Key ID
               </div>
             )}
             {credentials.issuerId ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Issuer ID set
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
                 <AlertCircle className="h-3.5 w-3.5" />
                 No Issuer ID
               </div>
             )}
             {credentials.privateKey ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Private key loaded
               </div>
             ) : hasStoredKey ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info/10 text-info text-xs font-medium">
                 <Clock className="h-3.5 w-3.5" />
                 Key encrypted
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
                 <AlertCircle className="h-3.5 w-3.5" />
                 No .p8 key
               </div>
@@ -1426,7 +1426,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
           
           {/* Unlock encrypted key inline */}
           {!credentials.privateKey && hasStoredKey && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-info/5 border border-info/20">
               <Input
                 type="password"
                 placeholder="Enter password to unlock key..."
@@ -1446,7 +1446,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
               >
                 {isUnlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Unlock'}
               </Button>
-              {unlockError && <span className="text-xs text-red-500">{unlockError}</span>}
+              {unlockError && <span className="text-xs text-destructive">{unlockError}</span>}
             </div>
           )}
           
@@ -1464,13 +1464,13 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
               ) : apps.length > 0 ? 'Reconnect' : 'Connect to App Store'}
             </Button>
             {connectionStatus && (
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${connectionStatus.success ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${connectionStatus.success ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
                 {connectionStatus.success ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                 <span className="text-sm font-medium">{connectionStatus.message}</span>
               </div>
             )}
             {sessionTimeLeft > 0 && !credentials.privateKey && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium font-mono">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium font-mono">
                 <Clock className="h-3.5 w-3.5" />
                 {formatTimeLeft(sessionTimeLeft)}
               </div>
@@ -1496,8 +1496,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                   className="h-10 w-10 rounded-xl shadow-sm"
                 />
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
-                  <AppWindow className="h-5 w-5 text-violet-500" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <AppWindow className="h-5 w-5 text-primary" />
                 </div>
               )}
               <div>
@@ -1564,8 +1564,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                  <Layers className="h-5 w-5 text-emerald-500" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+                  <Layers className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Current Localizations</CardTitle>
@@ -1614,13 +1614,13 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
               <div className="space-y-6">
                 {/* Copy from Previous Version Banner */}
                 {localesNeedingCopy.length > 0 && (
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                    <Copy className="h-5 w-5 text-amber-500 shrink-0" />
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
+                    <Copy className="h-5 w-5 text-warning shrink-0" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-amber-500">
+                      <p className="text-sm font-medium text-warning">
                         {localesNeedingCopy.length} locale(s) have empty What's New or Promo Text
                       </p>
-                      <p className="text-xs text-amber-500/70 mt-0.5">
+                      <p className="text-xs text-warning/70 mt-0.5">
                         Content available from previous version can be copied
                       </p>
                     </div>
@@ -1685,7 +1685,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                               </TableCell>
                               <TableCell>
                                 {loc.whatsNew ? (
-                                  <div className="flex items-center gap-1.5 text-emerald-500">
+                                  <div className="flex items-center gap-1.5 text-success">
                                     <CheckCircle2 className="h-4 w-4" />
                                     <span className="text-xs font-medium">Added</span>
                                   </div>
@@ -1795,7 +1795,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                             const isSource = loc.locale === sourceLocale
                             const isTranslatingThis = isTranslatingAppInfo === loc.locale
                             return (
-                              <TableRow key={loc.id} className={hasAnyEdit ? 'bg-amber-500/5' : 'hover:bg-muted/20'}>
+                              <TableRow key={loc.id} className={hasAnyEdit ? 'bg-warning/5' : 'hover:bg-muted/20'}>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <span className="text-lg">{localeInfo?.flag || '🌐'}</span>
@@ -1809,7 +1809,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                                     value={getAppInfoValue(loc, 'name')}
                                     onChange={(e) => handleAppInfoChange(loc.id, 'name', e.target.value)}
                                     maxLength={30}
-                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'name') ? 'border-amber-500 bg-amber-500/5' : ''}`}
+                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'name') ? 'border-warning bg-warning/5' : ''}`}
                                   />
                                 </TableCell>
                                 <TableCell>
@@ -1818,7 +1818,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                                     value={getAppInfoValue(loc, 'subtitle')}
                                     onChange={(e) => handleAppInfoChange(loc.id, 'subtitle', e.target.value)}
                                     maxLength={30}
-                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'subtitle') ? 'border-amber-500 bg-amber-500/5' : ''}`}
+                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'subtitle') ? 'border-warning bg-warning/5' : ''}`}
                                   />
                                 </TableCell>
                                 <TableCell>
@@ -1827,7 +1827,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                                     placeholder="https://..."
                                     value={getAppInfoValue(loc, 'privacyPolicyUrl')}
                                     onChange={(e) => handleAppInfoChange(loc.id, 'privacyPolicyUrl', e.target.value)}
-                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'privacyPolicyUrl') ? 'border-amber-500 bg-amber-500/5' : ''}`}
+                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'privacyPolicyUrl') ? 'border-warning bg-warning/5' : ''}`}
                                   />
                                 </TableCell>
                                 <TableCell>
@@ -1867,8 +1867,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
         <Card id="asc-aso-keywords" className="border-border/50 shadow-sm scroll-mt-6">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg">
-                <TrendingUp className="h-5 w-5 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-warning to-warning shadow-lg">
+                <TrendingUp className="h-5 w-5 text-warning-foreground" />
               </div>
               <div>
                 <CardTitle className="text-lg">ASO Keywords</CardTitle>
@@ -1878,8 +1878,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Info banner */}
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20">
-              <Search className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-warning/10 to-warning/10 border border-warning/20">
+              <Search className="h-5 w-5 text-warning mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground">Smart Keyword Generation</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -1930,7 +1930,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                       </div>
                       <div className="flex items-center gap-2">
                         {loc.keywords && (
-                          <span className={`text-xs font-mono ${charCount > 90 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                          <span className={`text-xs font-mono ${charCount > 90 ? 'text-warning' : 'text-muted-foreground'}`}>
                             {charCount}/100
                           </span>
                         )}
@@ -1949,7 +1949,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                   <Label className="text-xs font-medium text-muted-foreground">Edit Keywords</Label>
-                                  <span className={`text-xs font-mono ${editedKeywords.length > 90 ? 'text-amber-500' : editedKeywords.length > 100 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                  <span className={`text-xs font-mono ${editedKeywords.length > 90 ? 'text-warning' : editedKeywords.length > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
                                     {editedKeywords.length}/100
                                   </span>
                                 </div>
@@ -2078,7 +2078,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                               </Button>
 
                               {!currentAiApiKey && (
-                                <p className="text-xs text-amber-500 flex items-center gap-1">
+                                <p className="text-xs text-warning flex items-center gap-1">
                                   <AlertCircle className="h-3 w-3" />
                                   Configure AI API key in sidebar
                                 </p>
@@ -2102,7 +2102,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                   }
                 }}
                 disabled={generatingKeywordsFor !== null || !currentAiApiKey}
-                className="w-full h-11 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 border-0"
+                className="w-full h-11 bg-gradient-to-r from-warning to-warning hover:from-warning/90 hover:to-warning/90 border-0"
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Generate Keywords for All Locales ({versionLocalizations.length})
@@ -2118,8 +2118,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg">
-                  <Image className="h-5 w-5 text-white" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-info to-info shadow-lg">
+                  <Image className="h-5 w-5 text-info-foreground" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Screenshots</CardTitle>
@@ -2131,7 +2131,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                 disabled={isLoadingScreenshots}
                 variant={Object.keys(screenshotsByLocale).length > 0 ? "outline" : "default"}
                 size="sm"
-                className={Object.keys(screenshotsByLocale).length > 0 ? "h-9" : "h-9 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 border-0"}
+                className={Object.keys(screenshotsByLocale).length > 0 ? "h-9" : "h-9 bg-gradient-to-r from-info to-info hover:from-info/90 hover:to-info/90 border-0"}
               >
                 {isLoadingScreenshots ? (
                   <>
@@ -2204,7 +2204,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                       {isExpanded && screenshotData && (
                         <div className="px-4 pb-4 pt-2 border-t border-border/50 bg-muted/20">
                           {screenshotData.error ? (
-                            <div className="flex items-center gap-2 text-red-500 text-sm">
+                            <div className="flex items-center gap-2 text-destructive text-sm">
                               <AlertCircle className="h-4 w-4" />
                               <span>{screenshotData.error}</span>
                             </div>
@@ -2276,7 +2276,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
             {/* Upload Screenshots Section */}
             <div className="mt-6 pt-6 border-t border-border/50">
               <div className="flex items-center gap-3 mb-4">
-                <Upload className="h-5 w-5 text-pink-500" />
+                <Upload className="h-5 w-5 text-info" />
                 <div>
                   <h4 className="font-medium text-sm">Upload Screenshots</h4>
                   <p className="text-xs text-muted-foreground">Drag & drop a folder with language subfolders (en, fr, de...)</p>
@@ -2304,12 +2304,12 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                     type="checkbox"
                     checked={deleteExistingScreenshots}
                     onChange={(e) => setDeleteExistingScreenshots(e.target.checked)}
-                    className="h-4 w-4 rounded border-border text-pink-500 focus:ring-pink-500"
+                    className="h-4 w-4 rounded border-border text-info focus:ring-info"
                   />
                   <span className="text-sm">Replace existing screenshots</span>
                 </label>
                 {deleteExistingScreenshots && (
-                  <p className="text-xs text-amber-500 flex items-center gap-1 mt-2">
+                  <p className="text-xs text-warning flex items-center gap-1 mt-2">
                     <AlertCircle className="h-3 w-3" />
                     Existing screenshots for the selected device type will be deleted before uploading
                   </p>
@@ -2324,13 +2324,13 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                 className={`
                   relative rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200
                   ${isDraggingScreenshots
-                    ? 'border-pink-500 bg-pink-500/10 scale-[1.02]'
-                    : 'border-border/50 hover:border-pink-500/50 hover:bg-muted/30'
+                    ? 'border-info bg-info/10 scale-[1.02]'
+                    : 'border-border/50 hover:border-info/50 hover:bg-muted/30'
                   }
                 `}
               >
-                <FolderOpen className={`h-10 w-10 mx-auto mb-3 ${isDraggingScreenshots ? 'text-pink-500' : 'text-muted-foreground/50'}`} />
-                <p className={`font-medium ${isDraggingScreenshots ? 'text-pink-500' : 'text-muted-foreground'}`}>
+                <FolderOpen className={`h-10 w-10 mx-auto mb-3 ${isDraggingScreenshots ? 'text-info' : 'text-muted-foreground/50'}`} />
+                <p className={`font-medium ${isDraggingScreenshots ? 'text-info' : 'text-muted-foreground'}`}>
                   {isDraggingScreenshots ? 'Drop your folder here!' : 'Drop screenshot folder here'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -2363,9 +2363,9 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                         <div
                           key={locale}
                           className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                            status === 'done' ? 'bg-emerald-500/10 border-emerald-500/30' :
-                            status === 'error' ? 'bg-red-500/10 border-red-500/30' :
-                            status === 'uploading' ? 'bg-pink-500/10 border-pink-500/30' :
+                            status === 'done' ? 'bg-success/10 border-success/30' :
+                            status === 'error' ? 'bg-destructive/10 border-destructive/30' :
+                            status === 'uploading' ? 'bg-info/10 border-info/30' :
                             'bg-muted/30 border-border/50'
                           }`}
                         >
@@ -2387,11 +2387,11 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                             </p>
                           </div>
                           {status === 'uploading' ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-pink-500" />
+                            <Loader2 className="h-4 w-4 animate-spin text-info" />
                           ) : status === 'done' ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                            <CheckCircle2 className="h-4 w-4 text-success" />
                           ) : status === 'error' ? (
-                            <AlertCircle className="h-4 w-4 text-red-500" />
+                            <AlertCircle className="h-4 w-4 text-destructive" />
                           ) : (
                             <button
                               onClick={() => removeFromUploadQueue(locale)}
@@ -2407,14 +2407,14 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
 
                   {/* Upload progress */}
                   {isUploadingScreenshots && uploadProgress.total > 0 && (
-                    <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/30">
+                    <div className="p-3 rounded-lg bg-info/10 border border-info/30">
                       <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-pink-500 font-medium">Uploading...</span>
+                        <span className="text-info font-medium">Uploading...</span>
                         <span className="text-muted-foreground">{uploadProgress.current}/{uploadProgress.total}</span>
                       </div>
                       <div className="h-2 rounded-full bg-muted overflow-hidden">
                         <div
-                          className="h-full bg-pink-500 transition-all duration-300"
+                          className="h-full bg-info transition-all duration-300"
                           style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
                         />
                       </div>
@@ -2426,7 +2426,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                   <Button
                     onClick={handleUploadScreenshots}
                     disabled={isUploadingScreenshots || screenshotUploadQueue.every(q => q.status === 'done')}
-                    className="w-full h-10 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 border-0"
+                    className="w-full h-10 bg-gradient-to-r from-info to-info hover:from-info/90 hover:to-info/90 border-0"
                   >
                     {isUploadingScreenshots ? (
                       <>
@@ -2453,7 +2453,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
-                <Sparkles className="h-5 w-5 text-white" />
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
                 <CardTitle className="text-lg">AI Translation</CardTitle>
@@ -2475,7 +2475,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                 </span>
               </div>
               {!currentAiApiKey && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium ml-auto">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium ml-auto">
                   <AlertCircle className="h-3.5 w-3.5" />
                   Configure API key in sidebar
                 </div>
@@ -2569,7 +2569,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                         ${isSelected
                           ? 'border-primary bg-primary/5 shadow-sm'
                           : exists
-                            ? 'border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50'
+                            ? 'border-success/30 bg-success/5 hover:border-success/50'
                             : 'border-border/50 bg-background hover:border-border hover:bg-muted/30'
                         }
                       `}
@@ -2587,7 +2587,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                       <span className="text-lg">{locale.flag}</span>
                       <span className="text-sm font-medium flex-1">{locale.name}</span>
                       {exists && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success/10 text-success">
                           <CheckCircle2 className="h-3 w-3" />
                         </span>
                       )}
@@ -2639,7 +2639,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
 
             {/* Translation Complete Alert */}
             {translationAlert.show && (
-              <div className={`relative flex items-start gap-3 p-4 rounded-xl border ${translationAlert.success ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
+              <div className={`relative flex items-start gap-3 p-4 rounded-xl border ${translationAlert.success ? 'bg-success/10 border-success/20 text-success' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
                 {translationAlert.success ? <CheckCircle2 className="h-5 w-5 mt-0.5" /> : <AlertCircle className="h-5 w-5 mt-0.5" />}
                 <div className="flex-1">
                   <p className="font-semibold">{translationAlert.success ? 'Success!' : 'Completed with errors'}</p>
@@ -2663,8 +2663,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
       <Card id="asc-logs" className="border-border/50 shadow-sm scroll-mt-6">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10">
-              <Terminal className="h-5 w-5 text-slate-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted-foreground/10">
+              <Terminal className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <CardTitle className="text-lg">Activity Log</CardTitle>
@@ -2685,14 +2685,14 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                   <div
                     key={index}
                     className={`flex items-start gap-3 text-sm py-1.5 px-3 rounded-lg transition-colors ${
-                      log.type === 'error' ? 'bg-red-500/10' :
-                      log.type === 'success' ? 'bg-emerald-500/10' :
+                      log.type === 'error' ? 'bg-destructive/10' :
+                      log.type === 'success' ? 'bg-success/10' :
                       'hover:bg-muted/50'
                     }`}
                   >
                     <span className={`mt-0.5 ${
-                      log.type === 'error' ? 'text-red-500' :
-                      log.type === 'success' ? 'text-emerald-500' :
+                      log.type === 'error' ? 'text-destructive' :
+                      log.type === 'success' ? 'text-success' :
                       'text-muted-foreground'
                     }`}>
                       {log.type === 'error' ? <AlertCircle className="h-4 w-4" /> :
@@ -2701,8 +2701,8 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                     </span>
                     <span className="font-mono text-xs text-muted-foreground shrink-0 pt-0.5">{log.timestamp}</span>
                     <span className={`break-all ${
-                      log.type === 'error' ? 'text-red-400' :
-                      log.type === 'success' ? 'text-emerald-400' :
+                      log.type === 'error' ? 'text-destructive' :
+                      log.type === 'success' ? 'text-success' :
                       'text-foreground'
                     }`}>{log.message}</span>
                   </div>

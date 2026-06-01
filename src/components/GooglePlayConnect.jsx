@@ -436,12 +436,12 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl gradient-card border border-border/50 p-8 shadow-xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-success/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg">
-                <Store className="h-6 w-6 text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-success to-success shadow-lg">
+                <Store className="h-6 w-6 text-success-foreground" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Google Play Console</h1>
@@ -456,7 +456,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
           {listings.length > 0 && (
             <div className="flex gap-4">
               <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-                <div className="text-2xl font-bold text-green-500">{listings.length}</div>
+                <div className="text-2xl font-bold text-success">{listings.length}</div>
                 <div className="text-xs text-muted-foreground">Listings</div>
               </div>
             </div>
@@ -468,8 +468,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
       <Card id="gp-connection" className="border-border/50 shadow-sm card-hover scroll-mt-6">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
-              <Link2 className="h-5 w-5 text-green-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+              <Link2 className="h-5 w-5 text-success" />
             </div>
             <div>
               <CardTitle className="text-lg">Connect to Google Play</CardTitle>
@@ -480,24 +480,24 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
             {credentials.serviceAccountJson ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Service account loaded
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
                 <AlertCircle className="h-3.5 w-3.5" />
                 No service account
               </div>
             )}
             {connectionStatus?.tokenOnly && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info/10 text-info text-xs font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Token valid
               </div>
             )}
             {sessionTimeLeft > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium font-mono">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium font-mono">
                 <Clock className="h-3.5 w-3.5" />
                 {formatTimeLeft(sessionTimeLeft)}
               </div>
@@ -523,7 +523,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
             <Button
               onClick={handleTestConnection}
               disabled={isConnecting || !canConnect}
-              className={connectionStatus?.success && !connectionStatus?.tokenOnly ? '' : 'bg-green-600 hover:bg-green-700 border-0'}
+              className={connectionStatus?.success && !connectionStatus?.tokenOnly ? '' : 'bg-success hover:bg-success/90 border-0'}
             >
               {isConnecting ? (
                 <>
@@ -533,7 +533,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
               ) : packageName.trim() ? 'Test Full Access' : 'Validate Token'}
             </Button>
             {connectionStatus && (
-              <div className={`flex items-start gap-2 px-4 py-2 rounded-lg max-w-lg ${connectionStatus.success ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+              <div className={`flex items-start gap-2 px-4 py-2 rounded-lg max-w-lg ${connectionStatus.success ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
                 {connectionStatus.success ? <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" /> : <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />}
                 <span className="text-sm font-medium whitespace-pre-wrap">{connectionStatus.message}</span>
               </div>
@@ -573,8 +573,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
         <Card id="gp-app" className="border-border/50 shadow-sm card-hover scroll-mt-6">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
-                <AppWindow className="h-5 w-5 text-violet-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                <AppWindow className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-lg">App Package</CardTitle>
@@ -605,7 +605,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
                 </Button>
               ) : (
                 <div className="flex gap-2">
-                  <Button onClick={handleCommitEdit} className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={handleCommitEdit} className="bg-success hover:bg-success/90">
                     <Save className="h-4 w-4 mr-2" />
                     Commit Changes
                   </Button>
@@ -617,7 +617,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
               )}
             </div>
             {editId && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 text-amber-500 text-sm">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 text-warning text-sm">
                 <AlertCircle className="h-4 w-4" />
                 Edit session active. Remember to commit your changes!
               </div>
@@ -633,8 +633,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                  <Layers className="h-5 w-5 text-emerald-500" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+                  <Layers className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Store Listings</CardTitle>
@@ -693,8 +693,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
         <Card id="gp-images" className="border-border/50 shadow-sm card-hover scroll-mt-6">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/10">
-                <Image className="h-5 w-5 text-pink-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10">
+                <Image className="h-5 w-5 text-info" />
               </div>
               <div>
                 <CardTitle className="text-lg">Screenshots & Graphics</CardTitle>
@@ -787,7 +787,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
                         variant="outline"
                         size="sm"
                         onClick={handleDeleteAllImages}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All
@@ -838,7 +838,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
-                <Sparkles className="h-5 w-5 text-white" />
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
                 <CardTitle className="text-lg">AI Translation</CardTitle>
@@ -849,9 +849,9 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
           <CardContent className="space-y-6">
             {/* Translation Alert */}
             {translationAlert.show && (
-              <Alert className={translationAlert.success ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-amber-500/50 bg-amber-500/10'}>
-                {translationAlert.success ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <AlertCircle className="h-4 w-4 text-amber-500" />}
-                <AlertTitle className={translationAlert.success ? 'text-emerald-500' : 'text-amber-500'}>
+              <Alert className={translationAlert.success ? 'border-success/50 bg-success/10' : 'border-warning/50 bg-warning/10'}>
+                {translationAlert.success ? <CheckCircle2 className="h-4 w-4 text-success" /> : <AlertCircle className="h-4 w-4 text-warning" />}
+                <AlertTitle className={translationAlert.success ? 'text-success' : 'text-warning'}>
                   {translationAlert.success ? 'Translation Complete' : 'Translation Completed with Errors'}
                 </AlertTitle>
                 <AlertDescription>{translationAlert.message}</AlertDescription>
@@ -937,7 +937,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : exists
-                            ? 'border-emerald-500/30 bg-emerald-500/5'
+                            ? 'border-success/30 bg-success/5'
                             : 'border-border hover:border-primary/50'
                       }`}
                     >
@@ -952,7 +952,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
                       </div>
                       <span>{locale.flag}</span>
                       <span className="truncate">{locale.name}</span>
-                      {exists && <CheckCircle2 className="h-3 w-3 text-emerald-500 ml-auto shrink-0" />}
+                      {exists && <CheckCircle2 className="h-3 w-3 text-success ml-auto shrink-0" />}
                     </button>
                   )
                 })}
@@ -992,8 +992,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
       <Card id="gp-logs" className="border-border/50 shadow-sm scroll-mt-6">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10">
-              <Terminal className="h-5 w-5 text-slate-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted-foreground/10">
+              <Terminal className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <CardTitle className="text-lg">Activity Log</CardTitle>
@@ -1014,14 +1014,14 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
                   <div
                     key={index}
                     className={`flex items-start gap-3 text-sm py-1.5 px-3 rounded-lg transition-colors ${
-                      log.type === 'error' ? 'bg-red-500/10' :
-                      log.type === 'success' ? 'bg-emerald-500/10' :
+                      log.type === 'error' ? 'bg-destructive/10' :
+                      log.type === 'success' ? 'bg-success/10' :
                       'hover:bg-muted/50'
                     }`}
                   >
                     <span className={`mt-0.5 ${
-                      log.type === 'error' ? 'text-red-500' :
-                      log.type === 'success' ? 'text-emerald-500' :
+                      log.type === 'error' ? 'text-destructive' :
+                      log.type === 'success' ? 'text-success' :
                       'text-muted-foreground'
                     }`}>
                       {log.type === 'error' ? <AlertCircle className="h-4 w-4" /> :
@@ -1032,8 +1032,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange: _o
                       {log.timestamp}
                     </span>
                     <span className={`break-all ${
-                      log.type === 'error' ? 'text-red-400' :
-                      log.type === 'success' ? 'text-emerald-400' :
+                      log.type === 'error' ? 'text-destructive' :
+                      log.type === 'success' ? 'text-success' :
                       'text-foreground'
                     }`}>{log.message}</span>
                   </div>

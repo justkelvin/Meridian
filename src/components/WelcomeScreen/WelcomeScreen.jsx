@@ -53,16 +53,16 @@ function PostProcessing() {
 // Loading screen
 function LoadingScreen() {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-[#050510] z-50">
+    <div className="absolute inset-0 flex items-center justify-center bg-[var(--mono-black)] z-50">
       <div className="text-center">
         <div className="relative w-16 h-16 mx-auto mb-4">
           {/* Spinning ring */}
-          <div className="absolute inset-0 border-2 border-purple-500/30 rounded-full" />
-          <div className="absolute inset-0 border-2 border-transparent border-t-purple-500 rounded-full animate-spin" />
+          <div className="absolute inset-0 border-2 border-primary/30 rounded-full" />
+          <div className="absolute inset-0 border-2 border-transparent border-t-primary rounded-full animate-spin" />
           {/* Inner glow */}
-          <div className="absolute inset-2 bg-purple-500/10 rounded-full animate-pulse" />
+          <div className="absolute inset-2 bg-primary/10 rounded-full animate-pulse" />
         </div>
-        <p className="text-gray-400 text-sm animate-pulse">Loading experience...</p>
+        <p className="text-[var(--mono-rosy-granite)] text-sm animate-pulse">Loading experience...</p>
       </div>
     </div>
   )
@@ -76,8 +76,8 @@ function Scene() {
 
       {/* Lighting */}
       <ambientLight intensity={0.1} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} color="#9b6dff" />
-      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#4ecdc4" />
+      <pointLight position={[10, 10, 10]} intensity={0.5} color="#f4f4f6" />
+      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#9999a1" />
 
       {/* Space background */}
       <SpaceBackground />
@@ -129,7 +129,7 @@ export default function WelcomeScreen({ onComplete }) {
   return (
     <div
       ref={containerRef}
-      className={`fixed inset-0 bg-[#050510] transition-opacity duration-700 ${
+      className={`fixed inset-0 bg-[var(--mono-black)] transition-opacity duration-700 ${
         isExiting ? 'opacity-0' : 'opacity-100'
       }`}
       style={{ zIndex: 9999 }}
@@ -166,7 +166,7 @@ export default function WelcomeScreen({ onComplete }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse at center, transparent 0%, rgba(5, 5, 16, 0.4) 70%, rgba(5, 5, 16, 0.8) 100%)',
+            'radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.8) 100%)',
         }}
       />
     </div>

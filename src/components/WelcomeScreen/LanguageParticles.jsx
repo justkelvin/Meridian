@@ -133,10 +133,10 @@ function SpeedLines({ count = 100 }) {
     const colors = new Float32Array(count * 3)
 
     const colorOptions = [
-      new THREE.Color('#9b6dff'), // Purple
-      new THREE.Color('#4ecdc4'), // Cyan
-      new THREE.Color('#ff6b9d'), // Pink
-      new THREE.Color('#64b5f6'), // Blue
+      new THREE.Color('#f4f4f6'),
+      new THREE.Color('#e6e6e9'),
+      new THREE.Color('#9999a1'),
+      new THREE.Color('#66666e'),
     ]
 
     for (let i = 0; i < count; i++) {
@@ -224,7 +224,7 @@ function FlyingLanguages() {
   const texts = useMemo(() => {
     const random = createSeededRandom(9001)
     const items = []
-    const colorOptions = ['#9b6dff', '#4ecdc4', '#ff6b9d', '#64b5f6', '#b794f6']
+    const colorOptions = ['#f4f4f6', '#e6e6e9', '#9999a1', '#66666e']
 
     LANGUAGES.forEach((lang) => {
       // Create multiple instances of each language
