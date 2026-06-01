@@ -997,13 +997,6 @@ export function AppSidebar({
               </button>
             </div>
           </div>
-          
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-xs text-muted-foreground">Crafted with</span>
-            <span className="text-destructive">♥</span>
-            <span className="text-xs text-muted-foreground">by</span>
-            <span className="text-xs font-semibold text-foreground">Fayhe</span>
-          </div>
         </div>
       </SidebarFooter>
     </Sidebar>

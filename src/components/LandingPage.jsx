@@ -183,7 +183,6 @@ export default function LandingPage({ onLaunch }) {
               <FileText className="h-4 w-4" />
               <span>XCStrings, store metadata, screenshots, and subscriptions</span>
             </div>
-            <span>Localizer by Fayhe</span>
           </div>
         </footer>
       </main>

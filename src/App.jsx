@@ -754,10 +754,7 @@ function ProductAppShell() {
                           </div>
                           <div>
                             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                              Localizer{" "}
-                              <span className="text-muted-foreground font-normal text-lg">
-                                by Fayhe
-                              </span>
+                              Localizer
                             </h1>
                             <p className="text-sm text-muted-foreground">
                               AI-powered translation for iOS, macOS & Android
