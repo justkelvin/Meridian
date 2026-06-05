@@ -1,8 +1,8 @@
 {
-  "name": "xcstrings-localizer",
+  "name": "meridian",
   "private": false,
   "version": "1.0.0",
-  "description": "Translate iOS/macOS .xcstrings localization files with AI",
+  "description": "All-in-one toolkit to grow your app globally — localize store listings, optimize pricing, and generate screenshots with AI",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,13 +12,15 @@
     "deploy": "npm run build && npx gh-pages -d dist"
   },
   "keywords": [
-    "xcstrings",
+    "app-store",
+    "google-play",
     "localization",
     "ios",
-    "macos",
-    "swift",
+    "android",
     "translation",
-    "i18n"
+    "i18n",
+    "subscription-pricing",
+    "screenshot-generator"
   ],
   "license": "MIT",
   "dependencies": {

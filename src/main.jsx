@@ -6,7 +6,7 @@ import { ThemeProvider } from './components/ThemeProvider'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="system" storageKey="localizer-theme">
+    <ThemeProvider defaultTheme="system" storageKey="meridian-theme">
       <App />
     </ThemeProvider>
   </StrictMode>,

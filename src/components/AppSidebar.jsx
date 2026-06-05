@@ -233,7 +233,7 @@ export function AppSidebar({
             <Globe className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-base font-bold tracking-tight">Localizer</span>
+            <span className="text-base font-bold tracking-tight">Meridian</span>
             <span className="text-xs text-muted-foreground">App Store & Play Store</span>
           </div>
           <SidebarTrigger className="ml-auto size-8 text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:ml-0" />

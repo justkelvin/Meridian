@@ -79,11 +79,11 @@ import {
   Play,
 } from "lucide-react";
 
-const PROVIDER_CONFIG_KEY = "xcstrings-localizer-provider-config";
-const ASC_CONFIG_KEY = "asc-localizer-config";
-const GP_CONFIG_KEY = "gp-localizer-config";
-const PROTECTED_WORDS_KEY = "xcstrings-localizer-protected-words";
-const ACTIVE_PAGE_KEY = "xcstrings-localizer-active-page";
+const PROVIDER_CONFIG_KEY = "meridian-provider-config";
+const ASC_CONFIG_KEY = "meridian-asc-config";
+const GP_CONFIG_KEY = "meridian-gp-config";
+const PROTECTED_WORDS_KEY = "meridian-protected-words";
+const ACTIVE_PAGE_KEY = "meridian-active-page";
 
 function ProductAppShell() {
   // Page navigation state
@@ -744,7 +744,7 @@ function ProductAppShell() {
                           </div>
                           <div>
                             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                              Localizer
+                              Meridian
                             </h1>
                             <p className="text-sm text-muted-foreground">
                               AI-powered translation for iOS, macOS & Android

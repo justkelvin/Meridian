@@ -53,7 +53,7 @@ export default function LandingPage({ onLaunch }) {
               <Languages className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold leading-none">Localizer</p>
+              <p className="text-sm font-semibold leading-none">Meridian</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 App localization workspace
               </p>
@@ -80,7 +80,7 @@ export default function LandingPage({ onLaunch }) {
                 Local-first tools for release localization
               </div>
               <h1 className="max-w-4xl text-5xl font-bold leading-[1.02] tracking-normal text-foreground sm:text-6xl lg:text-7xl">
-                Localizer
+                Meridian
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
                 A focused workspace for translating app strings, store
@@ -89,7 +89,7 @@ export default function LandingPage({ onLaunch }) {
               </p>
               <div className="mt-9">
                 <Button size="lg" onClick={onLaunch} className="h-12 px-6">
-                  Open Localizer
+                  Open Meridian
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -149,7 +149,7 @@ export default function LandingPage({ onLaunch }) {
                   From source strings to store assets
                 </h2>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                  Localizer keeps API keys and uploaded credentials session
+                  Meridian keeps API keys and uploaded credentials session
                   scoped while giving release teams the controls they need for
                   protected words, AI providers, and export-ready outputs.
                 </p>

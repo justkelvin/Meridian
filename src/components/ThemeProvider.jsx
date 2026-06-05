@@ -9,7 +9,7 @@ const getSystemTheme = () => {
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'localizer-theme'
+  storageKey = 'meridian-theme'
 }) {
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {

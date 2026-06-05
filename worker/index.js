@@ -8,8 +8,8 @@ const GP_API_BASE = 'https://androidpublisher.googleapis.com'
 
 // Allowed origins
 const ALLOWED_ORIGINS = [
-  'https://localizer.fayhe.com',
-  'https://xcstrings-localizer.pages.dev'
+  'https://meridian.pages.dev',
+  'http://localhost:5173'
 ]
 
 export default {

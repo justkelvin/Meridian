@@ -1,17 +1,15 @@
-# 🚀 App Store & Play Store Localizer
+# 🚀 Meridian
 
-[![GitHub Stars](https://img.shields.io/github/stars/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/justkelvin/Meridian.svg?style=flat)](https://github.com/justkelvin/Meridian/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/justkelvin/Meridian.svg?style=flat)](https://github.com/justkelvin/Meridian/issues)
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-yellow.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
-[![Last Commit](https://img.shields.io/github/last-commit/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/commits/main)
+[![Last Commit](https://img.shields.io/github/last-commit/justkelvin/Meridian.svg?style=flat)](https://github.com/justkelvin/Meridian/commits/main)
 
 **The all-in-one toolkit to grow your app globally.** Localize your App Store and Google Play listings, optimize subscription pricing by country, and generate stunning screenshots — all connected directly to App Store Connect and Google Play Console.
 
-🌐 **Try it now:** [localizer.fayhe.com](https://localizer.fayhe.com/)
-
 ---
 
-## Why App Store & Play Store Localizer?
+## Why Meridian?
 
 Expanding your app internationally is painful:
 - Translating metadata manually takes forever
@@ -19,7 +17,7 @@ Expanding your app internationally is painful:
 - Creating localized screenshots for every language is tedious
 - Managing both iOS and Android stores doubles the work
 
-**App Store & Play Store Localizer solves all of this in one place.**
+**Meridian solves all of this in one place.**
 
 ---
 
@@ -63,13 +61,10 @@ Create professional App Store screenshots with device mockups in seconds.
 
 ## 🚀 Quick Start
 
-### Online (Recommended)
-Just visit **[localizer.fayhe.com](https://localizer.fayhe.com/)** — no installation needed.
-
 ### Self-Hosted
 ```bash
-git clone https://github.com/fayharinn/iOS-App-Distribution-Localizer.git
-cd iOS-App-Distribution-Localizer
+git clone https://github.com/justkelvin/Meridian.git
+cd Meridian
 npm install
 npm run dev
 ```
@@ -272,5 +267,3 @@ Screenshot generator based on [appscreen](https://github.com/YUZU-Hub/appscreen)
 - [krrskl](https://github.com/krrskl) Github models support
 
 ---
-
-[![Follow on X](https://img.shields.io/badge/Follow-@fayhecode-black?style=for-the-badge&logo=x)](https://x.com/fayhecode)
