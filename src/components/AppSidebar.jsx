@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play } from 'lucide-react'
+import { Globe, ChevronDown, Key, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play, Settings } from 'lucide-react'
 import { useTheme } from './ThemeContext'
 import {
   Sidebar,
@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Collapsible,
@@ -35,6 +34,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { PROVIDERS } from '@/services/translationService'
 import { encrypt, decrypt } from '@/utils/crypto'
 
@@ -53,6 +60,7 @@ export function AppSidebar({
   const { theme, setTheme } = useTheme()
   const [isDraggingKey, setIsDraggingKey] = useState(false)
   const [isDraggingGpKey, setIsDraggingGpKey] = useState(false)
+  const [configOpen, setConfigOpen] = useState(false)
   const [aiSettingsOpen, setAiSettingsOpen] = useState(true)
   const [ascSettingsOpen, setAscSettingsOpen] = useState(true)
   const [gpSettingsOpen, setGpSettingsOpen] = useState(false)
@@ -217,25 +225,27 @@ export function AppSidebar({
   }
 
   return (
-    <Sidebar variant="inset" collapsible="offcanvas">
+    <>
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border/50 bg-gradient-to-b from-sidebar to-sidebar/80">
-        <div className="flex items-center gap-3 px-3 py-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/90 shadow-lg shadow-primary/25">
+        <div className="flex items-center gap-3 px-3 py-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/90 shadow-lg shadow-primary/25 group-data-[collapsible=icon]:hidden">
             <Globe className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-base font-bold tracking-tight">Localizer</span>
             <span className="text-xs text-muted-foreground">App Store & Play Store</span>
           </div>
+          <SidebarTrigger className="ml-auto size-8 text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:ml-0" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
         {/* Navigation */}
-        <SidebarGroup className="pt-4">
+        <SidebarGroup className="pt-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
           <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 px-2 mb-2">Tools</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+          <SidebarGroupContent className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+            <SidebarMenu className="space-y-1 group-data-[collapsible=icon]:items-center">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   isActive={activePage === 'xcstrings'}
@@ -247,10 +257,10 @@ export function AppSidebar({
                       : 'hover:bg-muted/50'
                   }`}
                 >
-                  <Languages className={`h-5 w-5 ${activePage === 'xcstrings' ? 'text-primary' : ''}`} />
-                  <span>XCStrings</span>
+                  <Languages className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'xcstrings' ? 'text-primary' : ''}`} />
+                  <span className="group-data-[collapsible=icon]:hidden">XCStrings</span>
                   {activePage === 'xcstrings' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
                   )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -265,10 +275,10 @@ export function AppSidebar({
                       : 'hover:bg-muted/50'
                   }`}
                 >
-                  <Store className={`h-5 w-5 ${activePage === 'appstore' ? 'text-primary' : ''}`} />
-                  <span>App Store Connect</span>
+                  <Store className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'appstore' ? 'text-primary' : ''}`} />
+                  <span className="group-data-[collapsible=icon]:hidden">App Store Connect</span>
                   {activePage === 'appstore' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
                   )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -283,10 +293,10 @@ export function AppSidebar({
                       : 'hover:bg-muted/50'
                   }`}
                 >
-                  <Play className={`h-5 w-5 ${activePage === 'googleplay' ? 'text-primary' : ''}`} />
-                  <span>Google Play</span>
+                  <Play className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'googleplay' ? 'text-primary' : ''}`} />
+                  <span className="group-data-[collapsible=icon]:hidden">Google Play</span>
                   {activePage === 'googleplay' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
                   )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -301,10 +311,10 @@ export function AppSidebar({
                       : 'hover:bg-muted/50'
                   }`}
                 >
-                  <Image className={`h-5 w-5 ${activePage === 'screenshots' ? 'text-primary' : ''}`} />
-                  <span>Screenshots</span>
+                  <Image className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'screenshots' ? 'text-primary' : ''}`} />
+                  <span className="group-data-[collapsible=icon]:hidden">Screenshots</span>
                   {activePage === 'screenshots' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
                   )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -319,114 +329,178 @@ export function AppSidebar({
                       : 'hover:bg-muted/50'
                   }`}
                 >
-                  <DollarSign className={`h-5 w-5 ${activePage === 'subscriptions' ? 'text-primary' : ''}`} />
-                  <span>Subscriptions</span>
+                  <DollarSign className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'subscriptions' ? 'text-primary' : ''}`} />
+                  <span className="group-data-[collapsible=icon]:hidden">Subscriptions</span>
                   {activePage === 'subscriptions' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
                   )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setConfigOpen(true)}
+                  tooltip="Configuration"
+                  className="rounded-xl h-11 px-3 transition-all duration-200 hover:bg-muted/50"
+                >
+                  <Settings className="h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7" />
+                  <span className="group-data-[collapsible=icon]:hidden">Configuration</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
 
             {/* App Store Connect Quick Nav - only show when on appstore page */}
             {activePage === 'appstore' && (
-              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1">
+              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:border-l-0 group-data-[collapsible=icon]:pl-0">
                 <button
                   onClick={() => document.getElementById('asc-connection')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Link2 className="h-3.5 w-3.5" />
-                  <span>Connection</span>
+                  <Link2 className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Connection</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-app-version')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <AppWindow className="h-3.5 w-3.5" />
-                  <span>App & Version</span>
+                  <AppWindow className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">App & Version</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-localizations')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Layers className="h-3.5 w-3.5" />
-                  <span>Localizations</span>
+                  <Layers className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Localizations</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-aso-keywords')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  <span>ASO Keywords</span>
+                  <TrendingUp className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">ASO Keywords</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-screenshots')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Image className="h-3.5 w-3.5" />
-                  <span>Screenshots</span>
+                  <Image className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Screenshots</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-translation')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>AI Translation</span>
+                  <Sparkles className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">AI Translation</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-logs')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Terminal className="h-3.5 w-3.5" />
-                  <span>Activity Log</span>
+                  <Terminal className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Activity Log</span>
                 </button>
               </div>
             )}
 
             {/* Google Play Quick Nav - only show when on googleplay page */}
             {activePage === 'googleplay' && (
-              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1">
+              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:border-l-0 group-data-[collapsible=icon]:pl-0">
                 <button
                   onClick={() => document.getElementById('gp-connection')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Link2 className="h-3.5 w-3.5" />
-                  <span>Connection</span>
+                  <Link2 className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Connection</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('gp-app')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <AppWindow className="h-3.5 w-3.5" />
-                  <span>App Package</span>
+                  <AppWindow className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">App Package</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('gp-listings')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Layers className="h-3.5 w-3.5" />
-                  <span>Listings</span>
+                  <Layers className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Listings</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('gp-translation')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>AI Translation</span>
+                  <Sparkles className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">AI Translation</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('gp-logs')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                 >
-                  <Terminal className="h-3.5 w-3.5" />
-                  <span>Activity Log</span>
+                  <Terminal className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Activity Log</span>
                 </button>
               </div>
             )}
           </SidebarGroupContent>
         </SidebarGroup>
+      </SidebarContent>
 
-        <SidebarSeparator className="my-4 opacity-50" />
+      <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent">
+        <div className="px-4 py-4 space-y-4 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <div className="flex items-center justify-between p-2 rounded-xl bg-muted/30 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+            <span className="text-xs font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">Theme</span>
+            <div className="flex gap-1 group-data-[collapsible=icon]:flex-col">
+              <button
+                onClick={() => setTheme('light')}
+                className={`p-2 rounded-lg transition-all group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center ${
+                  theme === 'light'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+                title="Light mode"
+              >
+                <Sun className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`p-2 rounded-lg transition-all group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center ${
+                  theme === 'dark'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+                title="Dark mode"
+              >
+                <Moon className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+              </button>
+              <button
+                onClick={() => setTheme('system')}
+                className={`p-2 rounded-lg transition-all group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center ${
+                  theme === 'system'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+                title="System theme"
+              >
+                <Monitor className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+
+    <Dialog open={configOpen} onOpenChange={setConfigOpen}>
+      <DialogContent className="max-h-[90svh] sm:max-w-3xl p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6">
+          <DialogTitle>Configuration</DialogTitle>
+          <DialogDescription>
+            Manage AI provider, App Store Connect, and Google Play credentials.
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="max-h-[calc(90svh-7rem)] px-4 pb-6">
+          <div className="space-y-4 pr-2">
 
         {/* AI Provider Settings */}
         <Collapsible open={aiSettingsOpen} onOpenChange={setAiSettingsOpen}>
@@ -597,7 +671,7 @@ export function AppSidebar({
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 text-info text-xs font-medium hover:bg-info/20 transition-colors"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
                   <span>Get API Key from Apple</span>
                 </a>
 
@@ -676,7 +750,7 @@ export function AppSidebar({
                           setKeyError('')
                         }}
                       >
-                        <Save className="h-3.5 w-3.5" />
+                        <Save className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
                         Save Encrypted
                       </Button>
                     )}
@@ -691,7 +765,7 @@ export function AppSidebar({
                           setKeyError('')
                         }}
                       >
-                        <Unlock className="h-3.5 w-3.5" />
+                        <Unlock className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
                         Load Saved Key
                       </Button>
                     )}
@@ -704,7 +778,7 @@ export function AppSidebar({
                             className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             title="Delete saved key"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -732,7 +806,7 @@ export function AppSidebar({
                   {showPasswordInput && (
                     <div className="space-y-3 p-3 rounded-xl bg-muted/30 border border-border/50 mt-2">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Lock className="h-3.5 w-3.5" />
+                        <Lock className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
                         <span className="font-medium">{passwordMode === 'save' ? 'Encrypt & save key' : 'Enter password to decrypt'}</span>
                       </div>
                       <Input
@@ -848,7 +922,7 @@ export function AppSidebar({
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success text-xs font-medium hover:bg-success/20 transition-colors"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
                   <span>Setup Guide</span>
                 </a>
 
@@ -954,51 +1028,10 @@ export function AppSidebar({
             </CollapsibleContent>
           </SidebarGroup>
         </Collapsible>
-      </SidebarContent>
-
-      <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent">
-        <div className="px-4 py-4 space-y-4">
-          {/* Theme Toggle */}
-          <div className="flex items-center justify-between p-2 rounded-xl bg-muted/30">
-            <span className="text-xs font-medium text-muted-foreground">Theme</span>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setTheme('light')}
-                className={`p-2 rounded-lg transition-all ${
-                  theme === 'light' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-                title="Light mode"
-              >
-                <Sun className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`p-2 rounded-lg transition-all ${
-                  theme === 'dark' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-                title="Dark mode"
-              >
-                <Moon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setTheme('system')}
-                className={`p-2 rounded-lg transition-all ${
-                  theme === 'system' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-                title="System theme"
-              >
-                <Monitor className="h-4 w-4" />
-              </button>
-            </div>
           </div>
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

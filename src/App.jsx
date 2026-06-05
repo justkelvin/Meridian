@@ -35,7 +35,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   SidebarProvider,
-  SidebarTrigger,
   SidebarInset,
 } from "@/components/ui/sidebar";
 import {
@@ -79,7 +78,6 @@ import {
   DollarSign,
   Play,
 } from "lucide-react";
-import { ThemeToggle } from "./components/ThemeToggle";
 
 const PROVIDER_CONFIG_KEY = "xcstrings-localizer-provider-config";
 const ASC_CONFIG_KEY = "asc-localizer-config";
@@ -590,6 +588,43 @@ function ProductAppShell() {
     ? (progress.current / progress.total) * 100
     : 0;
 
+  const pageMeta = {
+    xcstrings: {
+      title: "XCStrings",
+      description: "Translate and edit string catalogs",
+      Icon: Languages,
+    },
+    appstore: {
+      title: "App Store Connect",
+      description: "Manage metadata, keywords, screenshots, and translations",
+      Icon: Store,
+    },
+    googleplay: {
+      title: "Google Play",
+      description: "Localize store listings through the Play Developer API",
+      Icon: Play,
+    },
+    screenshots: {
+      title: "Screenshots",
+      description: "Create localized app store screenshot assets",
+      Icon: Image,
+    },
+    subscriptions: {
+      title: "Subscriptions",
+      description: "Generate pricing and subscription localizations",
+      Icon: DollarSign,
+    },
+  };
+  const currentPageMeta = pageMeta[activePage] || pageMeta.xcstrings;
+  const PageIcon = currentPageMeta.Icon;
+  const providerName =
+    PROVIDERS[providerConfig.provider]?.name || "AI Provider";
+  const ascReady =
+    ascCredentials.keyId &&
+    ascCredentials.issuerId &&
+    ascCredentials.privateKey;
+  const gpReady = !!gpCredentials?.serviceAccountJson;
+
   return (
     <div className="min-h-svh bg-background">
       <Toaster position="top-right" richColors closeButton />
@@ -605,93 +640,48 @@ function ProductAppShell() {
           onGpCredentialsChange={setGpCredentials}
         />
         <SidebarInset>
-          <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border/50 bg-background/80 px-6 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-            <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
-
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/50">
-              <button
-                onClick={() => setActivePage("xcstrings")}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
-                    activePage === "xcstrings"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }
-                `}
-              >
-                <Languages className="h-4 w-4" />
-                <span className="hidden sm:inline">XCStrings</span>
-              </button>
-              <button
-                onClick={() => setActivePage("appstore")}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
-                    activePage === "appstore"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }
-                `}
-              >
-                <Store className="h-4 w-4" />
-                <span className="hidden sm:inline">App Store</span>
-              </button>
-              <button
-                onClick={() => setActivePage("googleplay")}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
-                    activePage === "googleplay"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }
-                `}
-              >
-                <Play className="h-4 w-4" />
-                <span className="hidden sm:inline">Google Play</span>
-              </button>
-              <button
-                onClick={() => setActivePage("screenshots")}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
-                    activePage === "screenshots"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }
-                `}
-              >
-                <Image className="h-4 w-4" />
-                <span className="hidden sm:inline">Screenshots</span>
-              </button>
-              <button
-                onClick={() => setActivePage("subscriptions")}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
-                    activePage === "subscriptions"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }
-                `}
-              >
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">Subscriptions</span>
-              </button>
+          <header className="sticky top-0 z-20 flex min-h-16 items-center gap-4 border-b border-border/50 bg-background/80 px-6 py-3 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <PageIcon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-semibold tracking-tight text-foreground">
+                  {currentPageMeta.title}
+                </h1>
+                <p className="hidden truncate text-sm text-muted-foreground sm:block">
+                  {currentPageMeta.description}
+                </p>
+              </div>
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
-              <ThemeToggle variant="compact" />
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
-                <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                <span className="text-xs font-medium text-success">
-                  Local-first
-                </span>
+            <div className="ml-auto flex min-w-0 items-center gap-2">
+              <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground md:flex">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span className="max-w-36 truncate">{providerName}</span>
               </div>
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <Shield className="h-3 w-3 text-primary" />
-                <span className="text-xs font-medium text-primary">Secure</span>
+              <div
+                className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium lg:flex ${
+                  currentApiKey
+                    ? "border-success/20 bg-success/10 text-success"
+                    : "border-warning/20 bg-warning/10 text-warning"
+                }`}
+              >
+                {currentApiKey ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  <AlertCircle className="h-3.5 w-3.5" />
+                )}
+                <span>{currentApiKey ? "AI ready" : "AI key needed"}</span>
+              </div>
+              <div className="hidden items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground xl:flex">
+                <Store className={ascReady ? "h-3.5 w-3.5 text-success" : "h-3.5 w-3.5"} />
+                <Play className={gpReady ? "h-3.5 w-3.5 text-success" : "h-3.5 w-3.5"} />
+                <span>Store credentials</span>
+              </div>
+              <div className="hidden items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary sm:flex">
+                <Shield className="h-3.5 w-3.5" />
+                <span>Local-first</span>
               </div>
             </div>
           </header>
