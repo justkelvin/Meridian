@@ -50,7 +50,7 @@ import {
 import { PROVIDERS } from '@/services/translationService'
 import { encrypt, decrypt } from '@/utils/crypto'
 
-const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
+import { ENCRYPTED_KEY_STORAGE } from '@/components/subscription-manager/constants'
 
 export function ConfigDialog({
   open,

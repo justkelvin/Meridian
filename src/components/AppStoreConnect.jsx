@@ -39,7 +39,7 @@ import {
 import { PROVIDERS } from '@/services/translationService'
 import { decrypt } from '@/utils/crypto'
 
-const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
+import { ENCRYPTED_KEY_STORAGE } from './app-store-connect/constants'
 
 export default function AppStoreConnect({ credentials, onCredentialsChange, aiConfig }) {
 

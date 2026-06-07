@@ -46,34 +46,7 @@ import { listApps, ASC_LOCALES, hasValidToken, getTokenTimeLeft } from '@/servic
 import { SUPPORTED_LANGUAGES } from '@/services/translationService'
 import { decrypt } from '@/utils/crypto'
 import PricingChart from './PricingChart'
-
-const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
-
-// ISO 2-letter to 3-letter country code mapping for App Store Connect API
-const ISO2_TO_ISO3 = {
-  'AF': 'AFG', 'AL': 'ALB', 'DZ': 'DZA', 'AO': 'AGO', 'AI': 'AIA', 'AG': 'ATG', 'AR': 'ARG', 'AM': 'ARM',
-  'AU': 'AUS', 'AT': 'AUT', 'AZ': 'AZE', 'BS': 'BHS', 'BH': 'BHR', 'BB': 'BRB', 'BY': 'BLR', 'BE': 'BEL',
-  'BZ': 'BLZ', 'BJ': 'BEN', 'BM': 'BMU', 'BT': 'BTN', 'BO': 'BOL', 'BA': 'BIH', 'BW': 'BWA', 'BR': 'BRA',
-  'VG': 'VGB', 'BN': 'BRN', 'BG': 'BGR', 'BF': 'BFA', 'KH': 'KHM', 'CM': 'CMR', 'CA': 'CAN', 'CV': 'CPV',
-  'KY': 'CYM', 'TD': 'TCD', 'CL': 'CHL', 'CN': 'CHN', 'CO': 'COL', 'CG': 'COG', 'CR': 'CRI', 'HR': 'HRV',
-  'CY': 'CYP', 'CZ': 'CZE', 'CI': 'CIV', 'CD': 'COD', 'DK': 'DNK', 'DM': 'DMA', 'DO': 'DOM', 'EC': 'ECU',
-  'EG': 'EGY', 'SV': 'SLV', 'EE': 'EST', 'SZ': 'SWZ', 'FJ': 'FJI', 'FI': 'FIN', 'FR': 'FRA', 'GA': 'GAB',
-  'GM': 'GMB', 'GE': 'GEO', 'DE': 'DEU', 'GH': 'GHA', 'GR': 'GRC', 'GD': 'GRD', 'GT': 'GTM', 'GW': 'GNB',
-  'GY': 'GUY', 'HN': 'HND', 'HK': 'HKG', 'HU': 'HUN', 'IS': 'ISL', 'IN': 'IND', 'ID': 'IDN', 'IQ': 'IRQ',
-  'IE': 'IRL', 'IL': 'ISR', 'IT': 'ITA', 'JM': 'JAM', 'JP': 'JPN', 'JO': 'JOR', 'KZ': 'KAZ', 'KE': 'KEN',
-  'KR': 'KOR', 'KW': 'KWT', 'KG': 'KGZ', 'LA': 'LAO', 'LV': 'LVA', 'LB': 'LBN', 'LR': 'LBR', 'LY': 'LBY',
-  'LT': 'LTU', 'LU': 'LUX', 'MO': 'MAC', 'MK': 'MKD', 'MG': 'MDG', 'MW': 'MWI', 'MY': 'MYS', 'MV': 'MDV',
-  'ML': 'MLI', 'MT': 'MLT', 'MR': 'MRT', 'MU': 'MUS', 'MX': 'MEX', 'FM': 'FSM', 'MD': 'MDA', 'MN': 'MNG',
-  'ME': 'MNE', 'MS': 'MSR', 'MA': 'MAR', 'MZ': 'MOZ', 'MM': 'MMR', 'NA': 'NAM', 'NR': 'NRU', 'NP': 'NPL',
-  'NL': 'NLD', 'NZ': 'NZL', 'NI': 'NIC', 'NE': 'NER', 'NG': 'NGA', 'NO': 'NOR', 'OM': 'OMN', 'PK': 'PAK',
-  'PW': 'PLW', 'PA': 'PAN', 'PG': 'PNG', 'PY': 'PRY', 'PE': 'PER', 'PH': 'PHL', 'PL': 'POL', 'PT': 'PRT',
-  'QA': 'QAT', 'RO': 'ROU', 'RU': 'RUS', 'RW': 'RWA', 'KN': 'KNA', 'LC': 'LCA', 'VC': 'VCT', 'ST': 'STP',
-  'SA': 'SAU', 'SN': 'SEN', 'RS': 'SRB', 'SC': 'SYC', 'SL': 'SLE', 'SG': 'SGP', 'SK': 'SVK', 'SI': 'SVN',
-  'SB': 'SLB', 'ZA': 'ZAF', 'ES': 'ESP', 'LK': 'LKA', 'SR': 'SUR', 'SE': 'SWE', 'CH': 'CHE', 'TW': 'TWN',
-  'TJ': 'TJK', 'TZ': 'TZA', 'TH': 'THA', 'TO': 'TON', 'TT': 'TTO', 'TN': 'TUN', 'TR': 'TUR', 'TM': 'TKM',
-  'TC': 'TCA', 'UG': 'UGA', 'UA': 'UKR', 'AE': 'ARE', 'GB': 'GBR', 'US': 'USA', 'UY': 'URY', 'UZ': 'UZB',
-  'VU': 'VUT', 'VE': 'VEN', 'VN': 'VNM', 'YE': 'YEM', 'ZM': 'ZMB', 'ZW': 'ZWE'
-}
+import { ENCRYPTED_KEY_STORAGE, ISO2_TO_ISO3 } from './subscription-manager/constants'
 
 
 export default function SubscriptionManager({ aiConfig, ascCredentials, onCredentialsChange }) {
