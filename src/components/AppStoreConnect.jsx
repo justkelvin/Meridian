@@ -37,9 +37,11 @@ import {
   ASC_LOCALES,
 } from '@/services/appStoreConnectService'
 import { PROVIDERS } from '@/services/translationService'
-import { decrypt } from '@/utils/crypto'
+
 
 import { ENCRYPTED_KEY_STORAGE } from './app-store-connect/constants'
+import { TRANSLATABLE_FIELDS } from './app-store-connect/translatableFields'
+import { useAscUnlock } from './app-store-connect/useAscUnlock'
 
 export default function AppStoreConnect({ credentials, onCredentialsChange, aiConfig }) {
 
@@ -68,42 +70,11 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
-  // Encrypted key unlock state
-  const [hasStoredKey] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !!window.localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-  })
-  const [unlockPassword, setUnlockPassword] = useState('')
-  const [isUnlocking, setIsUnlocking] = useState(false)
-  const [unlockError, setUnlockError] = useState('')
-
-  // Unlock encrypted key
+  // Encrypted key unlock (shared logic extracted to hook)
+  const { hasStoredKey, unlockPassword, setUnlockPassword, isUnlocking, unlockError, handleUnlockKey: handleUnlockKeyBase } = useAscUnlock(onCredentialsChange)
   const handleUnlockKey = async () => {
-    if (!unlockPassword) {
-      setUnlockError('Enter password')
-      return
-    }
-    
-    const stored = localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-    if (!stored) {
-      setUnlockError('No stored key found')
-      return
-    }
-    
-    setIsUnlocking(true)
-    setUnlockError('')
-    
-    const result = await decrypt(stored, unlockPassword)
-    
-    if (result.success) {
-      onCredentialsChange(prev => ({ ...prev, privateKey: result.data }))
-      setUnlockPassword('')
-      toast.success('Private key unlocked!')
-    } else {
-      setUnlockError('Wrong password')
-    }
-    
-    setIsUnlocking(false)
+    await handleUnlockKeyBase()
+    if (!unlockError) toast.success('Private key unlocked!')
   }
 
   // Apps & Versions
@@ -1318,12 +1289,6 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
   // Get existing locales from current localizations
   const existingLocales = versionLocalizations.map(l => l.locale)
 
-  const TRANSLATABLE_FIELDS = [
-    { key: 'description', label: 'Description', limit: 4000 },
-    { key: 'whatsNew', label: "What's New", limit: 4000 },
-    { key: 'promotionalText', label: 'Promotional Text', limit: 170 },
-    { key: 'keywords', label: 'Keywords', limit: 100 },
-  ]
 
   const isCredentialsComplete = credentials.keyId && credentials.issuerId && credentials.privateKey
   
@@ -1433,7 +1398,6 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                 value={unlockPassword}
                 onChange={(e) => {
                   setUnlockPassword(e.target.value)
-                  setUnlockError('')
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && handleUnlockKey()}
                 className="h-9 text-sm flex-1 max-w-[250px]"
