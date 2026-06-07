@@ -44,9 +44,9 @@ import {
 } from '@/services/subscriptionService'
 import { listApps, ASC_LOCALES, hasValidToken, getTokenTimeLeft } from '@/services/appStoreConnectService'
 import { SUPPORTED_LANGUAGES } from '@/services/translationService'
-import { decrypt } from '@/utils/crypto'
 import PricingChart from './PricingChart'
 import { ENCRYPTED_KEY_STORAGE, ISO2_TO_ISO3 } from './subscription-manager/constants'
+import { useAscUnlock } from './app-store-connect/useAscUnlock'
 
 
 export default function SubscriptionManager({ aiConfig, ascCredentials, onCredentialsChange }) {
@@ -62,14 +62,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   const [subscriptionDetail, setSubscriptionDetail] = useState(null)
   const [sessionTimeLeft, setSessionTimeLeft] = useState(0)
 
-  // Encrypted key unlock state
-  const [hasStoredKey] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !!window.localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-  })
-  const [unlockPassword, setUnlockPassword] = useState('')
-  const [isUnlocking, setIsUnlocking] = useState(false)
-  const [unlockError, setUnlockError] = useState('')
+  // Encrypted key unlock (shared logic extracted to hook)
+  const { hasStoredKey, unlockPassword, setUnlockPassword, isUnlocking, unlockError, handleUnlockKey } = useAscUnlock(onCredentialsChange)
 
   // Timer for session countdown
   useEffect(() => {
@@ -88,34 +82,6 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  // Unlock encrypted key
-  const handleUnlockKey = async () => {
-    if (!unlockPassword) {
-      setUnlockError('Enter password')
-      return
-    }
-    
-    const stored = localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-    if (!stored) {
-      setUnlockError('No stored key found')
-      return
-    }
-    
-    setIsUnlocking(true)
-    setUnlockError('')
-    
-    const result = await decrypt(stored, unlockPassword)
-    
-    if (result.success) {
-      onCredentialsChange(prev => ({ ...prev, privateKey: result.data }))
-      setUnlockPassword('')
-    } else {
-      setUnlockError('Wrong password')
-    }
-    
-    setIsUnlocking(false)
   }
 
   // Pricing state
@@ -744,7 +710,6 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       value={unlockPassword}
                       onChange={(e) => {
                         setUnlockPassword(e.target.value)
-                        setUnlockError('')
                       }}
                       onKeyDown={(e) => e.key === 'Enter' && handleUnlockKey()}
                       className="flex-1"
