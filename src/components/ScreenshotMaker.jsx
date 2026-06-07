@@ -1,6 +1,22 @@
+/**
+ * ScreenshotMaker — mounts the Appscreen HTML/CSS/JS tool inside a scoped div.
+ *
+ * Script loading and CSS scoping logic are extracted into focused utilities:
+ *   - ./screenshot-maker/scriptLoader   (loadScript, waitForElement)
+ *   - ./screenshot-maker/cssScoper      (scopeCss)
+ *
+ * The component itself is responsible only for React lifecycle coordination:
+ *   - injecting static HTML once on mount
+ *   - sequentially loading external scripts (deduplication handled by loader)
+ *   - calling AppscreenBridge lifecycle methods at the right times
+ *   - syncing localization/AI config payloads
+ */
+
 import { useEffect, useMemo, useRef, useState } from 'react'
 import appscreenHtml from '@/appscreen/appscreen.html?raw'
 import appscreenCss from '@/appscreen/appscreen.css?raw'
+import { scopeCss } from './screenshot-maker/cssScoper'
+import { loadScript, waitForElement } from './screenshot-maker/scriptLoader'
 
 const SCRIPT_URLS = [
   'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
@@ -11,132 +27,18 @@ const SCRIPT_URLS = [
   '/appscreen/language-utils.js',
   '/appscreen/magical-titles.js',
   '/appscreen/three-renderer.js',
-  '/appscreen/app.js'
+  '/appscreen/app.js',
 ]
-
-const scopeSelectors = (selectors, scope) => {
-  return selectors.split(',').map((selector) => {
-    const trimmed = selector.trim()
-    if (!trimmed) return ''
-    if (trimmed === ':root' || trimmed === 'html' || trimmed === 'body') return scope
-    if (trimmed.startsWith('html')) return trimmed.replace(/^html/, scope)
-    if (trimmed.startsWith('body')) return trimmed.replace(/^body/, scope)
-    return `${scope} ${trimmed}`
-  }).join(', ')
-}
-
-const extractBlock = (css, startIndex) => {
-  const openIndex = css.indexOf('{', startIndex)
-  if (openIndex === -1) return null
-  let depth = 0
-  for (let i = openIndex; i < css.length; i += 1) {
-    if (css[i] === '{') depth += 1
-    if (css[i] === '}') depth -= 1
-    if (depth === 0) {
-      return {
-        header: css.slice(startIndex, openIndex).trim(),
-        body: css.slice(openIndex + 1, i),
-        endIndex: i + 1
-      }
-    }
-  }
-  return null
-}
-
-const scopeCss = (css, scope) => {
-  let i = 0
-  let output = ''
-
-  while (i < css.length) {
-    const nextBrace = css.indexOf('{', i)
-    const nextAt = css.indexOf('@', i)
-
-    if (nextAt !== -1 && (nextBrace === -1 || nextAt < nextBrace)) {
-      const block = extractBlock(css, nextAt)
-      if (!block) {
-        output += css.slice(i)
-        break
-      }
-
-      const header = block.header
-      if (header.startsWith('@keyframes') || header.startsWith('@-webkit-keyframes') || header.startsWith('@-moz-keyframes') || header.startsWith('@-o-keyframes')) {
-        output += css.slice(nextAt, block.endIndex)
-        i = block.endIndex
-        continue
-      }
-
-      if (header.startsWith('@media') || header.startsWith('@supports') || header.startsWith('@container') || header.startsWith('@layer')) {
-        output += `${header}{${scopeCss(block.body, scope)}}`
-        i = block.endIndex
-        continue
-      }
-
-      output += css.slice(nextAt, block.endIndex)
-      i = block.endIndex
-      continue
-    }
-
-    if (nextBrace === -1) {
-      output += css.slice(i)
-      break
-    }
-
-    const selectorText = css.slice(i, nextBrace).trim()
-    const block = extractBlock(css, i)
-    if (!block) break
-    if (selectorText) {
-      output += `${scopeSelectors(selectorText, scope)}{${block.body}}`
-    }
-    i = block.endIndex
-  }
-
-  return output
-}
-
-const waitForElement = (id) => {
-  if (document.getElementById(id)) return Promise.resolve()
-  return new Promise((resolve) => {
-    const tick = () => {
-      if (document.getElementById(id)) {
-        resolve()
-        return
-      }
-      requestAnimationFrame(tick)
-    }
-    tick()
-  })
-}
-
-const loadScript = (src) => {
-  const existing = document.querySelector(`script[src="${src}"]`)
-  if (existing) {
-    return existing.dataset.loaded === 'true'
-      ? Promise.resolve()
-      : new Promise((resolve, reject) => {
-          existing.addEventListener('load', resolve)
-          existing.addEventListener('error', reject)
-        })
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = src
-    script.async = false
-    script.dataset.loaded = 'false'
-    script.onload = () => {
-      script.dataset.loaded = 'true'
-      resolve()
-    }
-    script.onerror = reject
-    document.body.appendChild(script)
-  })
-}
 
 export default function ScreenshotMaker({ localizationPayload, aiConfig, active }) {
   const [scriptsLoaded, setScriptsLoaded] = useState(false)
   const initializedRef = useRef(false)
   const rootRef = useRef(null)
+
+  // Scope the appscreen CSS once — avoids re-computation on every render
   const scopedCss = useMemo(() => scopeCss(appscreenCss, '.appscreen-root'), [])
+
+  // Derive the AI payload expected by AppscreenBridge from the provider config
   const aiPayload = useMemo(() => {
     if (!aiConfig) return null
     const provider = aiConfig.provider || 'openai'
@@ -147,6 +49,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     return { apiKey, model, provider, endpoint }
   }, [aiConfig])
 
+  // Inject static HTML once on first mount
   useEffect(() => {
     if (!rootRef.current) return
     if (!rootRef.current.innerHTML) {
@@ -154,6 +57,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     }
   }, [])
 
+  // Load external scripts sequentially; deduplicated by loadScript
   useEffect(() => {
     let cancelled = false
 
@@ -180,6 +84,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     }
   }, [])
 
+  // Initialize AppscreenBridge once all scripts are ready
   useEffect(() => {
     if (!scriptsLoaded || initializedRef.current) return
 
@@ -196,6 +101,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     })
   }, [scriptsLoaded])
 
+  // Mount the bridge when scripts are ready
   useEffect(() => {
     if (!scriptsLoaded) return
     if (window.AppscreenBridge?.mount) {
@@ -203,6 +109,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     }
   }, [scriptsLoaded])
 
+  // Re-sync bridge when tab becomes active
   useEffect(() => {
     if (!active || !scriptsLoaded) return
     const kick = () => {
@@ -219,6 +126,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     requestAnimationFrame(kick)
   }, [active, scriptsLoaded, localizationPayload, aiPayload])
 
+  // Keep localization data in sync
   useEffect(() => {
     if (!scriptsLoaded || !localizationPayload) return
     if (window.AppscreenBridge?.syncLocalizationData) {
@@ -226,6 +134,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     }
   }, [scriptsLoaded, localizationPayload])
 
+  // Keep AI config in sync
   useEffect(() => {
     if (!scriptsLoaded || !aiPayload) return
     if (window.AppscreenBridge?.syncAiConfig) {
