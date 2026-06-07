@@ -1,6 +1,15 @@
+/**
+ * AppSidebar — main navigation sidebar.
+ *
+ * Uses sub-components for nav items, quick-nav links, theme toggle,
+ * and the credentials configuration dialog.
+ *
+ * Exported as a named export to preserve all existing import sites:
+ *   import { AppSidebar } from './components/AppSidebar'
+ */
+
 import { useState } from 'react'
-import { Globe, ChevronDown, Key, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play, Settings } from 'lucide-react'
-import { useTheme } from './ThemeContext'
+import { Globe } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -10,42 +19,13 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { PROVIDERS } from '@/services/translationService'
-import { encrypt, decrypt } from '@/utils/crypto'
-
-const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
+import { SidebarNavItem } from './sidebar/SidebarNavItem'
+import { PageQuickNav } from './sidebar/PageQuickNav'
+import { SidebarThemeToggle } from './sidebar/SidebarThemeToggle'
+import { ConfigDialog } from './sidebar/ConfigDialog'
+import { NAV_ITEMS, ASC_QUICK_NAV, GP_QUICK_NAV } from './sidebar/sidebarConfig'
 
 export function AppSidebar({
   activePage,
@@ -55,983 +35,88 @@ export function AppSidebar({
   ascCredentials,
   onAscCredentialsChange,
   gpCredentials,
-  onGpCredentialsChange
+  onGpCredentialsChange,
 }) {
-  const { theme, setTheme } = useTheme()
-  const [isDraggingKey, setIsDraggingKey] = useState(false)
-  const [isDraggingGpKey, setIsDraggingGpKey] = useState(false)
   const [configOpen, setConfigOpen] = useState(false)
-  const [aiSettingsOpen, setAiSettingsOpen] = useState(true)
-  const [ascSettingsOpen, setAscSettingsOpen] = useState(true)
-  const [gpSettingsOpen, setGpSettingsOpen] = useState(false)
-
-  // Encrypted key state
-  const [hasStoredKey, setHasStoredKey] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !!window.localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-  })
-  const [keyPassword, setKeyPassword] = useState('')
-  const [showPasswordInput, setShowPasswordInput] = useState(false)
-  const [passwordMode, setPasswordMode] = useState('') // 'save' or 'load'
-  const [keyError, setKeyError] = useState('')
-  const [isSavingKey, setIsSavingKey] = useState(false)
-
-  const currentApiKey = providerConfig.apiKeys[providerConfig.provider] || ''
-  const currentModel = providerConfig.models[providerConfig.provider] || PROVIDERS[providerConfig.provider]?.defaultModel || ''
-
-  // Handlers
-  const handleProviderChange = (newProvider) => {
-    onProviderConfigChange(prev => ({ ...prev, provider: newProvider }))
-  }
-
-  const handleApiKeyChange = (newKey) => {
-    onProviderConfigChange(prev => ({
-      ...prev,
-      apiKeys: { ...prev.apiKeys, [prev.provider]: newKey }
-    }))
-  }
-
-  const handleModelChange = (newModel) => {
-    onProviderConfigChange(prev => ({
-      ...prev,
-      models: { ...prev.models, [prev.provider]: newModel }
-    }))
-  }
-
-  // Handle .p8 file
-  const processKeyFile = async (file) => {
-    if (!file) return
-    if (!file.name.endsWith('.p8')) return
-    try {
-      const content = await file.text()
-      
-      // Extract Key ID from filename (format: AuthKey_XXXXXXXXXX.p8)
-      const keyIdMatch = file.name.match(/AuthKey_([A-Z0-9]+)\.p8$/i)
-      const extractedKeyId = keyIdMatch ? keyIdMatch[1] : null
-      
-      onAscCredentialsChange(prev => ({
-        ...prev,
-        privateKey: content,
-        // Auto-fill Key ID if extracted and field is empty
-        ...(extractedKeyId && !prev.keyId ? { keyId: extractedKeyId } : {})
-      }))
-    } catch { /* ignore */ }
-  }
-
-  const handleKeyUpload = async (event) => {
-    await processKeyFile(event.target.files[0])
-  }
-
-  const handleKeyDragOver = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDraggingKey(true)
-  }
-
-  const handleKeyDragLeave = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDraggingKey(false)
-  }
-
-  const handleKeyDrop = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDraggingKey(false)
-    const files = e.dataTransfer.files
-    if (files.length > 0) {
-      await processKeyFile(files[0])
-    }
-  }
-
-  const getModelDisplayName = (model) => {
-    if (!model) return 'Select model'
-    if (model.includes('inference-profile/')) {
-      return model.split('/').pop().replace('global.anthropic.', '').replace(/-v\d+:\d+$/, '')
-    }
-    return model
-  }
-
-  // Save key encrypted with password
-  const handleSaveKeyEncrypted = async () => {
-    if (!keyPassword || keyPassword.length < 4) {
-      setKeyError('Password must be at least 4 characters')
-      return
-    }
-    if (!ascCredentials.privateKey) {
-      setKeyError('No key loaded to save')
-      return
-    }
-
-    setIsSavingKey(true)
-    setKeyError('')
-
-    try {
-      const encrypted = await encrypt(ascCredentials.privateKey, keyPassword)
-      localStorage.setItem(ENCRYPTED_KEY_STORAGE, encrypted)
-      setHasStoredKey(true)
-      setShowPasswordInput(false)
-      setKeyPassword('')
-      setPasswordMode('')
-    } catch {
-      setKeyError('Failed to encrypt key')
-    }
-
-    setIsSavingKey(false)
-  }
-
-  // Load key with password
-  const handleLoadKeyEncrypted = async () => {
-    if (!keyPassword) {
-      setKeyError('Please enter your password')
-      return
-    }
-
-    const stored = localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-    if (!stored) {
-      setKeyError('No stored key found')
-      return
-    }
-
-    setIsSavingKey(true)
-    setKeyError('')
-
-    const result = await decrypt(stored, keyPassword)
-
-    if (result.success) {
-      onAscCredentialsChange(prev => ({ ...prev, privateKey: result.data }))
-      setShowPasswordInput(false)
-      setKeyPassword('')
-      setPasswordMode('')
-    } else {
-      setKeyError('Wrong password')
-    }
-
-    setIsSavingKey(false)
-  }
-
-  // Delete stored encrypted key
-  const handleDeleteStoredKey = () => {
-    localStorage.removeItem(ENCRYPTED_KEY_STORAGE)
-    setHasStoredKey(false)
-  }
-
-  // Cancel password input
-  const handleCancelPassword = () => {
-    setShowPasswordInput(false)
-    setKeyPassword('')
-    setPasswordMode('')
-    setKeyError('')
-  }
 
   return (
     <>
-    <Sidebar variant="inset" collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border/50 bg-gradient-to-b from-sidebar to-sidebar/80">
-        <div className="flex items-center gap-3 px-3 py-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/90 shadow-lg shadow-primary/25 group-data-[collapsible=icon]:hidden">
-            <Globe className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-base font-bold tracking-tight">Meridian</span>
-            <span className="text-xs text-muted-foreground">App Store & Play Store</span>
-          </div>
-          <SidebarTrigger className="ml-auto size-8 text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:ml-0" />
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent className="px-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
-        {/* Navigation */}
-        <SidebarGroup className="pt-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 px-2 mb-2">Tools</SidebarGroupLabel>
-          <SidebarGroupContent className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
-            <SidebarMenu className="space-y-1 group-data-[collapsible=icon]:items-center">
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activePage === 'xcstrings'}
-                  onClick={() => onPageChange('xcstrings')}
-                  tooltip="XCStrings Translator"
-                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
-                    activePage === 'xcstrings'
-                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <Languages className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'xcstrings' ? 'text-primary' : ''}`} />
-                  <span className="group-data-[collapsible=icon]:hidden">XCStrings</span>
-                  {activePage === 'xcstrings' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activePage === 'appstore'}
-                  onClick={() => onPageChange('appstore')}
-                  tooltip="App Store Connect"
-                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
-                    activePage === 'appstore'
-                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <Store className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'appstore' ? 'text-primary' : ''}`} />
-                  <span className="group-data-[collapsible=icon]:hidden">App Store Connect</span>
-                  {activePage === 'appstore' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activePage === 'googleplay'}
-                  onClick={() => onPageChange('googleplay')}
-                  tooltip="Google Play Console"
-                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
-                    activePage === 'googleplay'
-                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <Play className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'googleplay' ? 'text-primary' : ''}`} />
-                  <span className="group-data-[collapsible=icon]:hidden">Google Play</span>
-                  {activePage === 'googleplay' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activePage === 'screenshots'}
-                  onClick={() => onPageChange('screenshots')}
-                  tooltip="Screenshot Maker"
-                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
-                    activePage === 'screenshots'
-                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <Image className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'screenshots' ? 'text-primary' : ''}`} />
-                  <span className="group-data-[collapsible=icon]:hidden">Screenshots</span>
-                  {activePage === 'screenshots' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activePage === 'subscriptions'}
-                  onClick={() => onPageChange('subscriptions')}
-                  tooltip="Subscription Pricing & Translations"
-                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
-                    activePage === 'subscriptions'
-                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <DollarSign className={`h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 ${activePage === 'subscriptions' ? 'text-primary' : ''}`} />
-                  <span className="group-data-[collapsible=icon]:hidden">Subscriptions</span>
-                  {activePage === 'subscriptions' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse group-data-[collapsible=icon]:hidden" />
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setConfigOpen(true)}
-                  tooltip="Configuration"
-                  className="rounded-xl h-11 px-3 transition-all duration-200 hover:bg-muted/50"
-                >
-                  <Settings className="h-5 w-5 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7" />
-                  <span className="group-data-[collapsible=icon]:hidden">Configuration</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-
-            {/* App Store Connect Quick Nav - only show when on appstore page */}
-            {activePage === 'appstore' && (
-              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:border-l-0 group-data-[collapsible=icon]:pl-0">
-                <button
-                  onClick={() => document.getElementById('asc-connection')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Link2 className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Connection</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('asc-app-version')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <AppWindow className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">App & Version</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('asc-localizations')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Layers className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Localizations</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('asc-aso-keywords')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <TrendingUp className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">ASO Keywords</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('asc-screenshots')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Image className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Screenshots</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('asc-translation')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Sparkles className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">AI Translation</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('asc-logs')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Terminal className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Activity Log</span>
-                </button>
-              </div>
-            )}
-
-            {/* Google Play Quick Nav - only show when on googleplay page */}
-            {activePage === 'googleplay' && (
-              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:border-l-0 group-data-[collapsible=icon]:pl-0">
-                <button
-                  onClick={() => document.getElementById('gp-connection')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Link2 className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Connection</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('gp-app')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <AppWindow className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">App Package</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('gp-listings')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Layers className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Listings</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('gp-translation')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Sparkles className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">AI Translation</span>
-                </button>
-                <button
-                  onClick={() => document.getElementById('gp-logs')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-                >
-                  <Terminal className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Activity Log</span>
-                </button>
-              </div>
-            )}
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent">
-        <div className="px-4 py-4 space-y-4 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <div className="flex items-center justify-between p-2 rounded-xl bg-muted/30 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
-            <span className="text-xs font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">Theme</span>
-            <div className="flex gap-1 group-data-[collapsible=icon]:flex-col">
-              <button
-                onClick={() => setTheme('light')}
-                className={`p-2 rounded-lg transition-all group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center ${
-                  theme === 'light'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-                title="Light mode"
-              >
-                <Sun className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-              </button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`p-2 rounded-lg transition-all group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center ${
-                  theme === 'dark'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-                title="Dark mode"
-              >
-                <Moon className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-              </button>
-              <button
-                onClick={() => setTheme('system')}
-                className={`p-2 rounded-lg transition-all group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center ${
-                  theme === 'system'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-                title="System theme"
-              >
-                <Monitor className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-              </button>
+      <Sidebar variant="inset" collapsible="icon">
+        {/* Header */}
+        <SidebarHeader className="border-b border-sidebar-border/50 bg-gradient-to-b from-sidebar to-sidebar/80">
+          <div className="flex items-center gap-3 px-3 py-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/90 shadow-lg shadow-primary/25 group-data-[collapsible=icon]:hidden">
+              <Globe className="h-5 w-5 text-primary-foreground" />
             </div>
+            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+              <span className="text-base font-bold tracking-tight">Meridian</span>
+              <span className="text-xs text-muted-foreground">App Store &amp; Play Store</span>
+            </div>
+            <SidebarTrigger className="ml-auto size-8 text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:ml-0" />
           </div>
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+        </SidebarHeader>
 
-    <Dialog open={configOpen} onOpenChange={setConfigOpen}>
-      <DialogContent className="max-h-[90svh] sm:max-w-3xl p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6">
-          <DialogTitle>Configuration</DialogTitle>
-          <DialogDescription>
-            Manage AI provider, App Store Connect, and Google Play credentials.
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="max-h-[calc(90svh-7rem)] px-4 pb-6">
-          <div className="space-y-4 pr-2">
-
-        {/* AI Provider Settings */}
-        <Collapsible open={aiSettingsOpen} onOpenChange={setAiSettingsOpen}>
-          <SidebarGroup>
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-medium">AI Provider</span>
-                </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
-              </CollapsibleTrigger>
+        {/* Navigation */}
+        <SidebarContent className="px-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
+          <SidebarGroup className="pt-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 px-2 mb-2">
+              Tools
             </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent className="px-2 pt-3 space-y-4">
-                {/* Provider Pills */}
-                <div className="flex flex-wrap gap-1.5">
-                  {Object.entries(PROVIDERS).map(([key, provider]) => (
-                    <button
-                      key={key}
-                      onClick={() => handleProviderChange(key)}
-                      className={`
-                        px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
-                        ${providerConfig.provider === key
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                        }
-                      `}
-                    >
-                      {provider.name}
-                    </button>
-                  ))}
-                </div>
-
-                {/* API Key */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">API Key</Label>
-                  <Input
-                    type="password"
-                    placeholder={providerConfig.provider === 'openai' ? 'sk-...' : 'Enter your API key...'}
-                    value={currentApiKey}
-                    onChange={(e) => handleApiKeyChange(e.target.value)}
-                    className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"
-                  />
-                </div>
-
-                {/* Model */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">Model / Deployment Name</Label>
-                  {PROVIDERS[providerConfig.provider]?.customModelInput ? (
-                    <>
-                      <Input
-                        placeholder={PROVIDERS[providerConfig.provider]?.defaultModel || 'model-name'}
-                        value={currentModel}
-                        onChange={(e) => handleModelChange(e.target.value)}
-                        className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"
-                        list={`model-suggestions-${providerConfig.provider}`}
-                      />
-                      <datalist id={`model-suggestions-${providerConfig.provider}`}>
-                        {PROVIDERS[providerConfig.provider]?.models.map(model => (
-                          <option key={model} value={model} />
-                        ))}
-                      </datalist>
-                    </>
-                  ) : (
-                    <select
-                      value={currentModel}
-                      onChange={(e) => handleModelChange(e.target.value)}
-                      className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                    >
-                      {PROVIDERS[providerConfig.provider]?.models.map(model => (
-                        <option key={model} value={model}>{getModelDisplayName(model)}</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-
-                {/* Service Tier for OpenAI */}
-                {PROVIDERS[providerConfig.provider]?.serviceTiers && (
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Service Tier</Label>
-                    <select
-                      value={providerConfig.serviceTier || 'auto'}
-                      onChange={(e) => onProviderConfigChange(prev => ({ ...prev, serviceTier: e.target.value }))}
-                      className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                    >
-                      {PROVIDERS[providerConfig.provider].serviceTiers.map(tier => (
-                        <option key={tier} value={tier}>
-                          {tier === 'auto' ? 'Auto (default)' : tier === 'priority' ? 'Priority (faster)' : tier === 'flex' ? 'Flex (cheaper)' : tier.charAt(0).toUpperCase() + tier.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-muted-foreground">
-                      Priority = faster, Flex = cheaper batch processing
-                    </p>
-                  </div>
-                )}
-
-                {/* Endpoint URL for Azure */}
-                {PROVIDERS[providerConfig.provider]?.needsEndpoint && (
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Endpoint URL</Label>
-                    <Input
-                      placeholder={PROVIDERS[providerConfig.provider]?.placeholder || 'https://your-resource.openai.azure.com'}
-                      value={providerConfig.endpoint || ''}
-                      onChange={(e) => onProviderConfigChange(prev => ({ ...prev, endpoint: e.target.value }))}
-                      className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"
+            <SidebarGroupContent className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+              <SidebarMenu className="space-y-1 group-data-[collapsible=icon]:items-center">
+                {NAV_ITEMS.map((item) =>
+                  item.isAction ? (
+                    <SidebarNavItem
+                      key={item.id}
+                      id={item.id}
+                      label={item.label}
+                      tooltip={item.tooltip}
+                      Icon={item.Icon}
+                      isActive={false}
+                      onClick={() => setConfigOpen(true)}
                     />
-                  </div>
-                )}
-
-                {/* Region for Bedrock */}
-                {PROVIDERS[providerConfig.provider]?.needsRegion && (
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">AWS Region</Label>
-                    <Input
-                      placeholder="us-east-1"
-                      value={providerConfig.region}
-                      onChange={(e) => onProviderConfigChange(prev => ({ ...prev, region: e.target.value }))}
-                      className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"
+                  ) : (
+                    <SidebarNavItem
+                      key={item.id}
+                      id={item.id}
+                      label={item.label}
+                      tooltip={item.tooltip}
+                      Icon={item.Icon}
+                      isActive={activePage === item.id}
+                      onClick={() => onPageChange(item.id)}
                     />
-                  </div>
+                  )
                 )}
+              </SidebarMenu>
 
-                {/* Status */}
-                <div className="pt-1">
-                  {currentApiKey ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs font-medium">Ready to translate</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 text-warning">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-xs font-medium">API key required</span>
-                    </div>
-                  )}
-                </div>
-              </SidebarGroupContent>
-            </CollapsibleContent>
+              {/* Contextual quick-nav for App Store Connect */}
+              {activePage === 'appstore' && <PageQuickNav items={ASC_QUICK_NAV} />}
+
+              {/* Contextual quick-nav for Google Play */}
+              {activePage === 'googleplay' && <PageQuickNav items={GP_QUICK_NAV} />}
+            </SidebarGroupContent>
           </SidebarGroup>
-        </Collapsible>
+        </SidebarContent>
 
-        <SidebarSeparator className="my-4 opacity-50" />
-
-        {/* App Store Connect Settings */}
-        <Collapsible open={ascSettingsOpen} onOpenChange={setAscSettingsOpen}>
-          <SidebarGroup>
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-info/10">
-                    <Key className="h-4 w-4 text-info" />
-                  </div>
-                  <span className="font-medium">App Store Connect</span>
-                </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent className="px-2 pt-3 space-y-4">
-                {/* Link to create API key */}
-                <a
-                  href="https://appstoreconnect.apple.com/access/integrations/api"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 text-info text-xs font-medium hover:bg-info/20 transition-colors"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span>Get API Key from Apple</span>
-                </a>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">Key ID</Label>
-                  <Input
-                    placeholder="XXXXXXXXXX"
-                    value={ascCredentials.keyId}
-                    onChange={(e) => onAscCredentialsChange(prev => ({ ...prev, keyId: e.target.value }))}
-                    className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">Issuer ID</Label>
-                  <Input
-                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                    value={ascCredentials.issuerId}
-                    onChange={(e) => onAscCredentialsChange(prev => ({ ...prev, issuerId: e.target.value }))}
-                    className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">Private Key (.p8)</Label>
-                  <Input
-                    type="file"
-                    accept=".p8"
-                    onChange={handleKeyUpload}
-                    className="hidden"
-                    id="sidebar-p8-input"
-                  />
-                  <label
-                    htmlFor="sidebar-p8-input"
-                    onDragOver={handleKeyDragOver}
-                    onDragLeave={handleKeyDragLeave}
-                    onDrop={handleKeyDrop}
-                    className={`
-                      flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 text-xs
-                      ${isDraggingKey
-                        ? 'border-primary bg-primary/10 text-primary scale-[1.02]'
-                        : ascCredentials.privateKey
-                          ? 'border-success/50 bg-success/10 text-success'
-                          : 'border-border/50 hover:border-primary/50 hover:bg-muted/30 text-muted-foreground'
-                      }
-                    `}
-                  >
-                    {isDraggingKey ? (
-                      <>
-                        <Key className="h-5 w-5 mb-1 animate-bounce" />
-                        <span className="font-medium">Drop your key here</span>
-                      </>
-                    ) : ascCredentials.privateKey ? (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 mb-1" />
-                        <span className="font-medium">Private key loaded</span>
-                      </>
-                    ) : (
-                      <>
-                        <Key className="h-5 w-5 mb-1 opacity-50" />
-                        <span className="font-medium">Drop .p8 file here</span>
-                      </>
-                    )}
-                  </label>
-
-                  {/* Save/Load encrypted key buttons */}
-                  <div className="flex gap-2 pt-2">
-                    {ascCredentials.privateKey && !showPasswordInput && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 h-8 text-xs gap-1.5"
-                        onClick={() => {
-                          setShowPasswordInput(true)
-                          setPasswordMode('save')
-                          setKeyError('')
-                        }}
-                      >
-                        <Save className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                        Save Encrypted
-                      </Button>
-                    )}
-                    {hasStoredKey && !ascCredentials.privateKey && !showPasswordInput && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 h-8 text-xs gap-1.5"
-                        onClick={() => {
-                          setShowPasswordInput(true)
-                          setPasswordMode('load')
-                          setKeyError('')
-                        }}
-                      >
-                        <Unlock className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                        Load Saved Key
-                      </Button>
-                    )}
-                    {hasStoredKey && !showPasswordInput && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            title="Delete saved key"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Saved Key?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete the encrypted key from storage. You'll need to upload the .p8 file again.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={handleDeleteStoredKey}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </div>
-
-                  {/* Password input for save/load */}
-                  {showPasswordInput && (
-                    <div className="space-y-3 p-3 rounded-xl bg-muted/30 border border-border/50 mt-2">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Lock className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                        <span className="font-medium">{passwordMode === 'save' ? 'Encrypt & save key' : 'Enter password to decrypt'}</span>
-                      </div>
-                      <Input
-                        type="password"
-                        placeholder="Enter password..."
-                        value={keyPassword}
-                        onChange={(e) => {
-                          setKeyPassword(e.target.value)
-                          setKeyError('')
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            passwordMode === 'save' ? handleSaveKeyEncrypted() : handleLoadKeyEncrypted()
-                          } else if (e.key === 'Escape') {
-                            handleCancelPassword()
-                          }
-                        }}
-                        className="h-9 text-sm"
-                        autoFocus
-                      />
-                      {keyError && (
-                        <p className="text-xs text-destructive font-medium">{keyError}</p>
-                      )}
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 h-8 text-xs"
-                          onClick={passwordMode === 'save' ? handleSaveKeyEncrypted : handleLoadKeyEncrypted}
-                          disabled={isSavingKey}
-                        >
-                          {isSavingKey ? 'Processing...' : passwordMode === 'save' ? 'Save Key' : 'Unlock'}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 text-xs"
-                          onClick={handleCancelPassword}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Status & Clear */}
-                <div className="flex items-center justify-between pt-2">
-                  {ascCredentials.keyId && ascCredentials.issuerId && ascCredentials.privateKey ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success flex-1">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs font-medium">Ready to connect</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-muted-foreground flex-1">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-xs font-medium">Credentials incomplete</span>
-                    </div>
-                  )}
-                  {(ascCredentials.keyId || ascCredentials.issuerId || ascCredentials.privateKey) && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Clear ASC Credentials?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will clear your Key ID, Issuer ID, and loaded private key. You'll need to enter them again to connect.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => onAscCredentialsChange({ keyId: '', issuerId: '', privateKey: '' })}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Clear
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
-                </div>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
-
-        <SidebarSeparator className="my-4 opacity-50" />
-
-        {/* Google Play Settings */}
-        <Collapsible open={gpSettingsOpen} onOpenChange={setGpSettingsOpen}>
-          <SidebarGroup>
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10">
-                    <Play className="h-4 w-4 text-success" />
-                  </div>
-                  <span className="font-medium">Google Play</span>
-                </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent className="px-2 pt-3 space-y-4">
-                {/* Link to create service account */}
-                <a
-                  href="https://developers.google.com/android-publisher/getting_started"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success text-xs font-medium hover:bg-success/20 transition-colors"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span>Setup Guide</span>
-                </a>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">Service Account JSON</Label>
-                  <Input
-                    type="file"
-                    accept=".json"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        const content = await file.text()
-                        onGpCredentialsChange(prev => ({ ...prev, serviceAccountJson: content }))
-                      }
-                    }}
-                    className="hidden"
-                    id="sidebar-gp-json-input"
-                  />
-                  <label
-                    htmlFor="sidebar-gp-json-input"
-                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingGpKey(true) }}
-                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingGpKey(false) }}
-                    onDrop={async (e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      setIsDraggingGpKey(false)
-                      const file = e.dataTransfer.files[0]
-                      if (file?.name.endsWith('.json')) {
-                        const content = await file.text()
-                        onGpCredentialsChange(prev => ({ ...prev, serviceAccountJson: content }))
-                      }
-                    }}
-                    className={`
-                      flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 text-xs
-                      ${isDraggingGpKey
-                        ? 'border-success bg-success/10 text-success scale-[1.02]'
-                        : gpCredentials?.serviceAccountJson
-                          ? 'border-success/50 bg-success/10 text-success'
-                          : 'border-border/50 hover:border-success/50 hover:bg-muted/30 text-muted-foreground'
-                      }
-                    `}
-                  >
-                    {isDraggingGpKey ? (
-                      <>
-                        <Key className="h-5 w-5 mb-1 animate-bounce" />
-                        <span className="font-medium">Drop JSON here</span>
-                      </>
-                    ) : gpCredentials?.serviceAccountJson ? (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 mb-1" />
-                        <span className="font-medium">Service account loaded</span>
-                      </>
-                    ) : (
-                      <>
-                        <Key className="h-5 w-5 mb-1 opacity-50" />
-                        <span className="font-medium">Drop .json file here</span>
-                      </>
-                    )}
-                  </label>
-                </div>
-
-                {/* Status & Clear */}
-                <div className="flex items-center justify-between pt-2">
-                  {gpCredentials?.serviceAccountJson ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 text-success flex-1">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs font-medium">Ready to connect</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-muted-foreground flex-1">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-xs font-medium">Upload service account</span>
-                    </div>
-                  )}
-                  {gpCredentials?.serviceAccountJson && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Clear Google Play Credentials?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will clear your service account JSON. You'll need to upload it again to connect.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => onGpCredentialsChange({ serviceAccountJson: '' })}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Clear
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
-                </div>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+        {/* Footer — theme switcher */}
+        <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent">
+          <div className="px-4 py-4 space-y-4 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <SidebarThemeToggle />
           </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Configuration dialog */}
+      <ConfigDialog
+        open={configOpen}
+        onOpenChange={setConfigOpen}
+        providerConfig={providerConfig}
+        onProviderConfigChange={onProviderConfigChange}
+        ascCredentials={ascCredentials}
+        onAscCredentialsChange={onAscCredentialsChange}
+        gpCredentials={gpCredentials}
+        onGpCredentialsChange={onGpCredentialsChange}
+      />
     </>
   )
 }

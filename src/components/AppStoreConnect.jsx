@@ -37,9 +37,20 @@ import {
   ASC_LOCALES,
 } from '@/services/appStoreConnectService'
 import { PROVIDERS } from '@/services/translationService'
-import { decrypt } from '@/utils/crypto'
 
-const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
+
+import { ENCRYPTED_KEY_STORAGE } from './app-store-connect/constants'
+import { TRANSLATABLE_FIELDS } from './app-store-connect/translatableFields'
+import { useAscUnlock } from './app-store-connect/useAscUnlock'
+import { AscHero } from './app-store-connect/ui/AscHero'
+import { AscConnection } from './app-store-connect/ui/AscConnection'
+import { AscAppSelector } from './app-store-connect/ui/AscAppSelector'
+import { AscLocalizations } from './app-store-connect/ui/AscLocalizations'
+import { AscKeywords } from './app-store-connect/ui/AscKeywords'
+import { AscScreenshots } from './app-store-connect/ui/AscScreenshots'
+import { AscTranslationSettings } from './app-store-connect/ui/AscTranslationSettings'
+import { AscLogs } from './app-store-connect/ui/AscLogs'
+import { AscEditDialog, AscCreateVersionDialog, AscScreenshotPreviewDialog } from './app-store-connect/ui/AscDialogs'
 
 export default function AppStoreConnect({ credentials, onCredentialsChange, aiConfig }) {
 
@@ -68,42 +79,11 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
-  // Encrypted key unlock state
-  const [hasStoredKey] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !!window.localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-  })
-  const [unlockPassword, setUnlockPassword] = useState('')
-  const [isUnlocking, setIsUnlocking] = useState(false)
-  const [unlockError, setUnlockError] = useState('')
-
-  // Unlock encrypted key
+  // Encrypted key unlock (shared logic extracted to hook)
+  const { hasStoredKey, unlockPassword, setUnlockPassword, isUnlocking, unlockError, handleUnlockKey: handleUnlockKeyBase } = useAscUnlock(onCredentialsChange)
   const handleUnlockKey = async () => {
-    if (!unlockPassword) {
-      setUnlockError('Enter password')
-      return
-    }
-    
-    const stored = localStorage.getItem(ENCRYPTED_KEY_STORAGE)
-    if (!stored) {
-      setUnlockError('No stored key found')
-      return
-    }
-    
-    setIsUnlocking(true)
-    setUnlockError('')
-    
-    const result = await decrypt(stored, unlockPassword)
-    
-    if (result.success) {
-      onCredentialsChange(prev => ({ ...prev, privateKey: result.data }))
-      setUnlockPassword('')
-      toast.success('Private key unlocked!')
-    } else {
-      setUnlockError('Wrong password')
-    }
-    
-    setIsUnlocking(false)
+    await handleUnlockKeyBase()
+    if (!unlockError) toast.success('Private key unlocked!')
   }
 
   // Apps & Versions
@@ -1318,12 +1298,6 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
   // Get existing locales from current localizations
   const existingLocales = versionLocalizations.map(l => l.locale)
 
-  const TRANSLATABLE_FIELDS = [
-    { key: 'description', label: 'Description', limit: 4000 },
-    { key: 'whatsNew', label: "What's New", limit: 4000 },
-    { key: 'promotionalText', label: 'Promotional Text', limit: 170 },
-    { key: 'keywords', label: 'Keywords', limit: 100 },
-  ]
 
   const isCredentialsComplete = credentials.keyId && credentials.issuerId && credentials.privateKey
   
@@ -1334,1637 +1308,159 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl gradient-card border border-border/50 p-8 shadow-xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-info/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative flex flex-col md:flex-row md:items-center gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-info to-info shadow-lg">
-                <Store className="h-6 w-6 text-info-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">App Store Connect</h1>
-                <p className="text-sm text-muted-foreground">Translate your app metadata</p>
-              </div>
-            </div>
-            <p className="text-muted-foreground max-w-xl">
-              Connect to Apple's App Store Connect API to automatically translate your app descriptions,
-              what's new, keywords, and promotional text across all locales.
-            </p>
-          </div>
-          {apps.length > 0 && (
-            <div className="flex gap-4">
-              <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-                <div className="text-2xl font-bold text-info">{apps.length}</div>
-                <div className="text-xs text-muted-foreground">Apps</div>
-              </div>
-              {selectedVersion && (
-                <div className="text-center px-4 py-3 rounded-xl bg-background/50 border border-border/50">
-                  <div className="text-2xl font-bold text-success">{versionLocalizations.length}</div>
-                  <div className="text-xs text-muted-foreground">Locales</div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      <AscHero stats={{ apps: apps.length, locales: versionLocalizations.length }} />
 
       {/* Connection Status */}
-      <Card id="asc-connection" className="border-border/50 shadow-sm card-hover scroll-mt-6">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10">
-              <Link2 className="h-5 w-5 text-info" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Connect to App Store</CardTitle>
-              <CardDescription>Configure credentials in the sidebar, then connect</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            {credentials.keyId ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Key ID set
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
-                <AlertCircle className="h-3.5 w-3.5" />
-                No Key ID
-              </div>
-            )}
-            {credentials.issuerId ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Issuer ID set
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
-                <AlertCircle className="h-3.5 w-3.5" />
-                No Issuer ID
-              </div>
-            )}
-            {credentials.privateKey ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Private key loaded
-              </div>
-            ) : hasStoredKey ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info/10 text-info text-xs font-medium">
-                <Clock className="h-3.5 w-3.5" />
-                Key encrypted
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">
-                <AlertCircle className="h-3.5 w-3.5" />
-                No .p8 key
-              </div>
-            )}
-          </div>
-          
-          {/* Unlock encrypted key inline */}
-          {!credentials.privateKey && hasStoredKey && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-info/5 border border-info/20">
-              <Input
-                type="password"
-                placeholder="Enter password to unlock key..."
-                value={unlockPassword}
-                onChange={(e) => {
-                  setUnlockPassword(e.target.value)
-                  setUnlockError('')
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleUnlockKey()}
-                className="h-9 text-sm flex-1 max-w-[250px]"
-              />
-              <Button
-                size="sm"
-                onClick={handleUnlockKey}
-                disabled={isUnlocking}
-                className="h-9"
-              >
-                {isUnlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Unlock'}
-              </Button>
-              {unlockError && <span className="text-xs text-destructive">{unlockError}</span>}
-            </div>
-          )}
-          
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={handleTestConnection}
-              disabled={isConnecting || !canConnect}
-              className={apps.length > 0 ? '' : 'gradient-primary border-0'}
-            >
-              {isConnecting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Connecting...
-                </>
-              ) : apps.length > 0 ? 'Reconnect' : 'Connect to App Store'}
-            </Button>
-            {connectionStatus && (
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${connectionStatus.success ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                {connectionStatus.success ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                <span className="text-sm font-medium">{connectionStatus.message}</span>
-              </div>
-            )}
-            {sessionTimeLeft > 0 && !credentials.privateKey && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium font-mono">
-                <Clock className="h-3.5 w-3.5" />
-                {formatTimeLeft(sessionTimeLeft)}
-              </div>
-            )}
-          </div>
-          {!canConnect && (
-            <p className="text-sm text-muted-foreground px-4 py-3 rounded-lg bg-muted/30 border border-border/50">
-              Configure your App Store Connect credentials in the sidebar to get started.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      <AscConnection
+        credentials={credentials}
+        hasStoredKey={hasStoredKey}
+        unlockPassword={unlockPassword}
+        setUnlockPassword={setUnlockPassword}
+        handleUnlockKey={handleUnlockKey}
+        isUnlocking={isUnlocking}
+        unlockError={unlockError}
+        isConnecting={isConnecting}
+        canConnect={canConnect}
+        apps={apps}
+        handleTestConnection={handleTestConnection}
+        connectionStatus={connectionStatus}
+        sessionTimeLeft={sessionTimeLeft}
+        formatTimeLeft={formatTimeLeft}
+      />
 
       {/* App & Version Selection */}
-      {apps.length > 0 && (
-        <Card id="asc-app-version" className="border-border/50 shadow-sm card-hover scroll-mt-6">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-3">
-              {selectedApp?.iconUrl ? (
-                <img 
-                  src={selectedApp.iconUrl} 
-                  alt={selectedApp.name}
-                  className="h-10 w-10 rounded-xl shadow-sm"
-                />
-              ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <AppWindow className="h-5 w-5 text-primary" />
-                </div>
-              )}
-              <div>
-                <CardTitle className="text-lg">Select App & Version</CardTitle>
-                <CardDescription>Choose which app version to translate</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">App</Label>
-                <select
-                  value={selectedApp?.id || ''}
-                  onChange={(e) => handleAppSelect(e.target.value)}
-                  disabled={isLoadingApps}
-                  className="w-full h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
-                >
-                  <option value="">Select an app...</option>
-                  {apps.map(app => (
-                    <option key={app.id} value={app.id}>
-                      {app.name} ({app.bundleId})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Version</Label>
-                <div className="flex gap-2">
-                  <select
-                    value={selectedVersion?.id || ''}
-                    onChange={(e) => handleVersionSelect(e.target.value)}
-                    disabled={isLoadingVersions || !selectedApp}
-                    className="flex-1 h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
-                  >
-                    <option value="">Select a version...</option>
-                    {versions.map(version => (
-                      <option key={version.id} value={version.id}>
-                        v{version.versionString} ({version.platform}) - {version.state}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCreateVersionDialog(prev => ({ ...prev, open: true }))}
-                    disabled={!selectedApp}
-                    className="h-10 w-10 p-0"
-                    title="Create new version"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <AscAppSelector
+        apps={apps}
+        selectedApp={selectedApp}
+        handleAppSelect={handleAppSelect}
+        isLoadingApps={isLoadingApps}
+        versions={versions}
+        selectedVersion={selectedVersion}
+        handleVersionSelect={handleVersionSelect}
+        isLoadingVersions={isLoadingVersions}
+        setCreateVersionDialog={setCreateVersionDialog}
+      />
 
       {/* Current Localizations */}
-      {selectedVersion && (
-        <Card id="asc-localizations" className="border-border/50 shadow-sm scroll-mt-6">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
-                  <Layers className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Current Localizations</CardTitle>
-                  <CardDescription>
-                    View and edit existing localizations for v{selectedVersion.versionString}
-                  </CardDescription>
-                </div>
-              </div>
-              {/* Copy from Previous Version Button */}
-              {localesNeedingCopy.length > 0 && (
-                <Button
-                  onClick={handleCopyFromPreviousVersion}
-                  disabled={isCopyingFromPrevious}
-                  variant="outline"
-                  size="sm"
-                  className="h-9"
-                >
-                  {isCopyingFromPrevious ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Copying...
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copy from Previous ({localesNeedingCopy.length})
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoadingLocalizations ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin mr-3" />
-                <span>Loading localizations...</span>
-              </div>
-            ) : versionLocalizations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Globe className="h-10 w-10 mb-3 opacity-30" />
-                <p className="font-medium">No localizations found</p>
-                <p className="text-sm">Add translations using the section below</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Copy from Previous Version Banner */}
-                {localesNeedingCopy.length > 0 && (
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
-                    <Copy className="h-5 w-5 text-warning shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-warning">
-                        {localesNeedingCopy.length} locale(s) have empty What's New or Promo Text
-                      </p>
-                      <p className="text-xs text-warning/70 mt-0.5">
-                        Content available from previous version can be copied
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Version Localizations Table */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <Layers className="h-4 w-4 text-muted-foreground" />
-                      Version Content
-                    </h4>
-                    {/* Copy Support URL button */}
-                    {versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleCopySupportUrl}
-                        disabled={isCopyingSupportUrl}
-                        className="gap-2"
-                      >
-                        {isCopyingSupportUrl ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Copying...
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-4 w-4" />
-                            Copy Support URL to all
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                  <div className="rounded-xl border border-border/50 overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30 hover:bg-muted/30">
-                          <TableHead className="w-[150px] font-semibold">Locale</TableHead>
-                          <TableHead className="font-semibold">Description</TableHead>
-                          <TableHead className="w-[120px] font-semibold">What's New</TableHead>
-                          <TableHead className="w-[100px] font-semibold">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {versionLocalizations.map(loc => {
-                          const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                          return (
-                            <TableRow key={loc.id} className="group hover:bg-muted/20">
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{localeInfo?.flag || '🌐'}</span>
-                                  <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell className="max-w-[300px]">
-                                <span className="text-sm text-muted-foreground truncate block">
-                                  {loc.description ? loc.description.substring(0, 80) + '...' : <span className="italic text-muted-foreground/50">No description</span>}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                {loc.whatsNew ? (
-                                  <div className="flex items-center gap-1.5 text-success">
-                                    <CheckCircle2 className="h-4 w-4" />
-                                    <span className="text-xs font-medium">Added</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground/50 italic">Empty</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEditLocalization(loc, 'version')}
-                                  className="h-8 px-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <Edit3 className="h-3.5 w-3.5 mr-1.5" />
-                                  Edit
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-
-                {/* App Info Localizations Table (Name, Subtitle, Privacy URL) */}
-                {appInfoLocalizations.localizations.length > 0 && (
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <AppWindow className="h-4 w-4 text-muted-foreground" />
-                        App Info (Name, Subtitle, Privacy Policy URL)
-                      </h4>
-                      <div className="flex items-center gap-2">
-                        {hasAppInfoChanges && (
-                          <Button
-                            size="sm"
-                            onClick={handleSaveAllAppInfo}
-                            disabled={isSavingAppInfo}
-                            className="gradient-primary border-0"
-                          >
-                            {isSavingAppInfo ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Save All Changes ({editedFieldsCount})
-                              </>
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Protected words + Translate All */}
-                    <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-muted/30 border border-border/50">
-                      <div className="flex items-center gap-2 flex-1">
-                        <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">Protected words:</Label>
-                        <Input
-                          placeholder="Chill, Pro, Plus..."
-                          value={appInfoProtectedWords}
-                          onChange={(e) => setAppInfoProtectedWords(e.target.value)}
-                          className="h-8 text-sm flex-1 max-w-[200px]"
-                        />
-                        <span className="text-xs text-muted-foreground">Won't be translated</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleTranslateAppInfo()}
-                        disabled={isTranslatingAppInfo || !currentAiApiKey}
-                        className="gap-2"
-                      >
-                        {isTranslatingAppInfo === 'all' ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Translating...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4" />
-                            Translate All
-                          </>
-                        )}
-                      </Button>
-                    </div>
-
-                    <div className="rounded-xl border border-border/50 overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/30 hover:bg-muted/30">
-                            <TableHead className="w-[140px] font-semibold">Locale</TableHead>
-                            <TableHead className="w-[180px] font-semibold">Name (30)</TableHead>
-                            <TableHead className="w-[200px] font-semibold">Subtitle (30)</TableHead>
-                            <TableHead className="w-[180px] font-semibold">Privacy URL</TableHead>
-                            <TableHead className="w-[50px]"></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {appInfoLocalizations.localizations.map(loc => {
-                            const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                            const hasAnyEdit = Object.prototype.hasOwnProperty.call(editedAppInfo, loc.id)
-                            const isSource = loc.locale === sourceLocale
-                            const isTranslatingThis = isTranslatingAppInfo === loc.locale
-                            return (
-                              <TableRow key={loc.id} className={hasAnyEdit ? 'bg-warning/5' : 'hover:bg-muted/20'}>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-lg">{localeInfo?.flag || '🌐'}</span>
-                                    <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
-                                    {isSource && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Source</Badge>}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    placeholder="App Name"
-                                    value={getAppInfoValue(loc, 'name')}
-                                    onChange={(e) => handleAppInfoChange(loc.id, 'name', e.target.value)}
-                                    maxLength={30}
-                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'name') ? 'border-warning bg-warning/5' : ''}`}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    placeholder="Subtitle"
-                                    value={getAppInfoValue(loc, 'subtitle')}
-                                    onChange={(e) => handleAppInfoChange(loc.id, 'subtitle', e.target.value)}
-                                    maxLength={30}
-                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'subtitle') ? 'border-warning bg-warning/5' : ''}`}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    type="url"
-                                    placeholder="https://..."
-                                    value={getAppInfoValue(loc, 'privacyPolicyUrl')}
-                                    onChange={(e) => handleAppInfoChange(loc.id, 'privacyPolicyUrl', e.target.value)}
-                                    className={`text-sm h-9 ${isFieldEdited(loc.id, 'privacyPolicyUrl') ? 'border-warning bg-warning/5' : ''}`}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  {!isSource && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => handleTranslateAppInfo(loc.locale)}
-                                      disabled={isTranslatingAppInfo || !currentAiApiKey}
-                                      className="h-8 w-8 p-0"
-                                      title="Translate this locale"
-                                    >
-                                      {isTranslatingThis ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        <Sparkles className="h-4 w-4" />
-                                      )}
-                                    </Button>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            )
-                          })}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      <AscLocalizations
+        selectedVersion={selectedVersion}
+        localesNeedingCopy={localesNeedingCopy}
+        handleCopyFromPreviousVersion={handleCopyFromPreviousVersion}
+        isCopyingFromPrevious={isCopyingFromPrevious}
+        isLoadingLocalizations={isLoadingLocalizations}
+        versionLocalizations={versionLocalizations}
+        sourceLocale={sourceLocale}
+        handleCopySupportUrl={handleCopySupportUrl}
+        isCopyingSupportUrl={isCopyingSupportUrl}
+        handleEditLocalization={handleEditLocalization}
+        appInfoLocalizations={appInfoLocalizations}
+        hasAppInfoChanges={hasAppInfoChanges}
+        handleSaveAllAppInfo={handleSaveAllAppInfo}
+        isSavingAppInfo={isSavingAppInfo}
+        editedFieldsCount={editedFieldsCount}
+        appInfoProtectedWords={appInfoProtectedWords}
+        setAppInfoProtectedWords={setAppInfoProtectedWords}
+        handleTranslateAppInfo={handleTranslateAppInfo}
+        isTranslatingAppInfo={isTranslatingAppInfo}
+        currentAiApiKey={currentAiApiKey}
+        getAppInfoValue={getAppInfoValue}
+        handleAppInfoChange={handleAppInfoChange}
+        isFieldEdited={isFieldEdited}
+        editedAppInfo={editedAppInfo}
+      />
 
       {/* ASO Keywords Tool */}
-      {selectedVersion && versionLocalizations.length > 0 && (
-        <Card id="asc-aso-keywords" className="border-border/50 shadow-sm scroll-mt-6">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-warning to-warning shadow-lg">
-                <TrendingUp className="h-5 w-5 text-warning-foreground" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">ASO Keywords</CardTitle>
-                <CardDescription>Optimize keywords for each locale using AI</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Info banner */}
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-warning/10 to-warning/10 border border-warning/20">
-              <Search className="h-5 w-5 text-warning mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-foreground">Smart Keyword Generation</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Generate optimized, country-specific keywords based on your app description.
-                  Keywords are tailored for each market, not just translated.
-                </p>
-              </div>
-            </div>
-
-            {/* Keywords by locale */}
-            <div className="space-y-2">
-              {versionLocalizations.map(loc => {
-                const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                const isExpanded = asoExpandedLocales.includes(loc.locale)
-                const isGenerating = generatingKeywordsFor === loc.locale
-                const keywordCount = loc.keywords ? loc.keywords.split(',').length : 0
-                const charCount = loc.keywords?.length || 0
-
-                return (
-                  <div
-                    key={loc.id}
-                    className="rounded-xl border border-border/50 overflow-hidden transition-all duration-200 hover:border-border"
-                  >
-                    {/* Locale header */}
-                    <div
-                      className="flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-                      onClick={() => toggleAsoLocale(loc.locale)}
-                    >
-                      <span className="text-xl">{localeInfo?.flag || '🌐'}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
-                          {loc.keywords ? (
-                            <Badge variant="outline" className="text-xs">
-                              {keywordCount} keywords
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs text-muted-foreground">
-                              No keywords
-                            </Badge>
-                          )}
-                        </div>
-                        {loc.keywords && (
-                          <p className="text-xs text-muted-foreground mt-1 truncate">
-                            {loc.keywords}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {loc.keywords && (
-                          <span className={`text-xs font-mono ${charCount > 90 ? 'text-warning' : 'text-muted-foreground'}`}>
-                            {charCount}/100
-                          </span>
-                        )}
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                      </div>
-                    </div>
-
-                    {/* Expanded content */}
-                    {isExpanded && (
-                      <div className="px-4 pb-4 pt-2 border-t border-border/50 bg-muted/20">
-                        <div className="space-y-3">
-                          {/* Keywords display or edit mode */}
-                          {editingKeywordsFor === loc.locale ? (
-                            /* Edit mode */
-                            <div className="space-y-3">
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs font-medium text-muted-foreground">Edit Keywords</Label>
-                                  <span className={`text-xs font-mono ${editedKeywords.length > 90 ? 'text-warning' : editedKeywords.length > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                                    {editedKeywords.length}/100
-                                  </span>
-                                </div>
-                                <Textarea
-                                  value={editedKeywords}
-                                  onChange={(e) => setEditedKeywords(e.target.value)}
-                                  placeholder="keyword1,keyword2,keyword3"
-                                  className="min-h-[80px] text-sm font-mono resize-none"
-                                  maxLength={100}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                  Separate keywords with commas. No spaces after commas.
-                                </p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    saveEditedKeywords(loc.locale)
-                                  }}
-                                  disabled={isSavingKeywords || editedKeywords.length > 100}
-                                  size="sm"
-                                  className="flex-1 h-9"
-                                >
-                                  {isSavingKeywords ? (
-                                    <>
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                      Saving...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                                      Save Keywords
-                                    </>
-                                  )}
-                                </Button>
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    cancelEditingKeywords()
-                                  }}
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-9"
-                                  disabled={isSavingKeywords}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            /* View mode */
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-xs font-medium text-muted-foreground">Current Keywords</Label>
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    startEditingKeywords(loc.locale, loc.keywords)
-                                  }}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 px-2 text-xs"
-                                >
-                                  <Edit3 className="h-3 w-3 mr-1" />
-                                  Edit
-                                </Button>
-                              </div>
-                              {loc.keywords ? (
-                                <div
-                                  className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-background/50 border border-border/30 cursor-pointer hover:border-primary/30 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    startEditingKeywords(loc.locale, loc.keywords)
-                                  }}
-                                >
-                                  {loc.keywords.split(',').map((keyword, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="px-2.5 py-1 rounded-lg bg-background border border-border/50 text-xs font-medium hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                                    >
-                                      {keyword.trim()}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div
-                                  className="p-4 rounded-lg bg-background/50 border border-dashed border-border/50 cursor-pointer hover:border-primary/30 transition-colors text-center"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    startEditingKeywords(loc.locale, '')
-                                  }}
-                                >
-                                  <p className="text-sm text-muted-foreground">No keywords set</p>
-                                  <p className="text-xs text-muted-foreground/70 mt-1">Click to add keywords</p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Generate button - only show when not editing */}
-                          {editingKeywordsFor !== loc.locale && (
-                            <>
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleGenerateASOKeywords(loc.locale)
-                                }}
-                                disabled={isGenerating || !currentAiApiKey}
-                                variant="outline"
-                                size="sm"
-                                className="w-full h-9"
-                              >
-                                {isGenerating ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Generating optimized keywords...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Sparkles className="h-4 w-4 mr-2" />
-                                    {loc.keywords ? 'AI Regenerate Keywords' : 'AI Generate Keywords'}
-                                  </>
-                                )}
-                              </Button>
-
-                              {!currentAiApiKey && (
-                                <p className="text-xs text-warning flex items-center gap-1">
-                                  <AlertCircle className="h-3 w-3" />
-                                  Configure AI API key in sidebar
-                                </p>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Generate all button */}
-            <div className="pt-2">
-              <Button
-                onClick={async () => {
-                  for (const loc of versionLocalizations) {
-                    await handleGenerateASOKeywords(loc.locale)
-                  }
-                }}
-                disabled={generatingKeywordsFor !== null || !currentAiApiKey}
-                className="w-full h-11 bg-gradient-to-r from-warning to-warning hover:from-warning/90 hover:to-warning/90 border-0"
-              >
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Generate Keywords for All Locales ({versionLocalizations.length})
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* ASO Keywords Tool */}
+      <AscKeywords
+        selectedVersion={selectedVersion}
+        versionLocalizations={versionLocalizations}
+        asoExpandedLocales={asoExpandedLocales}
+        generatingKeywordsFor={generatingKeywordsFor}
+        toggleAsoLocale={toggleAsoLocale}
+        editingKeywordsFor={editingKeywordsFor}
+        editedKeywords={editedKeywords}
+        setEditedKeywords={setEditedKeywords}
+        saveEditedKeywords={saveEditedKeywords}
+        isSavingKeywords={isSavingKeywords}
+        cancelEditingKeywords={cancelEditingKeywords}
+        startEditingKeywords={startEditingKeywords}
+        handleGenerateASOKeywords={handleGenerateASOKeywords}
+        currentAiApiKey={currentAiApiKey}
+      />
 
       {/* Screenshots */}
-      {selectedVersion && versionLocalizations.length > 0 && (
-        <Card id="asc-screenshots" className="border-border/50 shadow-sm scroll-mt-6">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-info to-info shadow-lg">
-                  <Image className="h-5 w-5 text-info-foreground" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Screenshots</CardTitle>
-                  <CardDescription>View screenshots for each locale</CardDescription>
-                </div>
-              </div>
-              <Button
-                onClick={handleLoadScreenshots}
-                disabled={isLoadingScreenshots}
-                variant={Object.keys(screenshotsByLocale).length > 0 ? "outline" : "default"}
-                size="sm"
-                className={Object.keys(screenshotsByLocale).length > 0 ? "h-9" : "h-9 bg-gradient-to-r from-info to-info hover:from-info/90 hover:to-info/90 border-0"}
-              >
-                {isLoadingScreenshots ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Loading...
-                  </>
-                ) : Object.keys(screenshotsByLocale).length > 0 ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </>
-                ) : (
-                  <>
-                    <Image className="h-4 w-4 mr-2" />
-                    Load Screenshots
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {Object.keys(screenshotsByLocale).length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Image className="h-10 w-10 mb-3 opacity-30" />
-                <p className="font-medium">No screenshots loaded</p>
-                <p className="text-sm mt-1">Click "Load Screenshots" to view all locale screenshots</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {versionLocalizations.map(loc => {
-                  const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                  const screenshotData = screenshotsByLocale[loc.locale]
-                  const isExpanded = expandedScreenshotLocales.includes(loc.locale)
-                  const totalCount = screenshotData?.totalScreenshots || 0
-
-                  return (
-                    <div
-                      key={loc.id}
-                      className="rounded-xl border border-border/50 overflow-hidden transition-all duration-200 hover:border-border"
-                    >
-                      {/* Locale header */}
-                      <div
-                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-                        onClick={() => toggleScreenshotLocale(loc.locale)}
-                      >
-                        <span className="text-xl">{localeInfo?.flag || '🌐'}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
-                            {totalCount > 0 ? (
-                              <Badge variant="outline" className="text-xs">
-                                {totalCount} screenshot{totalCount !== 1 ? 's' : ''}
-                              </Badge>
-                            ) : (
-                              <Badge variant="secondary" className="text-xs text-muted-foreground">
-                                No screenshots
-                              </Badge>
-                            )}
-                          </div>
-                          {screenshotData?.sets?.length > 0 && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {screenshotData.sets.length} device type{screenshotData.sets.length !== 1 ? 's' : ''}
-                            </p>
-                          )}
-                        </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                      </div>
-
-                      {/* Expanded content */}
-                      {isExpanded && screenshotData && (
-                        <div className="px-4 pb-4 pt-2 border-t border-border/50 bg-muted/20">
-                          {screenshotData.error ? (
-                            <div className="flex items-center gap-2 text-destructive text-sm">
-                              <AlertCircle className="h-4 w-4" />
-                              <span>{screenshotData.error}</span>
-                            </div>
-                          ) : screenshotData.sets.length === 0 ? (
-                            <p className="text-sm text-muted-foreground italic">No screenshot sets found</p>
-                          ) : (
-                            <div className="space-y-4">
-                              {screenshotData.sets.map(set => {
-                                const DeviceIcon = getDeviceIcon(set.displayType)
-                                return (
-                                  <div key={set.id} className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <DeviceIcon className="h-4 w-4 text-muted-foreground" />
-                                      <span className="text-sm font-medium">{set.displayInfo.name}</span>
-                                      <span className="text-xs text-muted-foreground">({set.displayInfo.device})</span>
-                                      <Badge variant="outline" className="text-xs ml-auto">
-                                        {set.screenshots.length}
-                                      </Badge>
-                                    </div>
-                                    {set.screenshots.length > 0 && (
-                                      <div className="flex gap-2 overflow-x-auto pb-2">
-                                        {set.screenshots.map((screenshot, idx) => (
-                                          <div
-                                            key={screenshot.id}
-                                            className="flex-shrink-0 relative group cursor-pointer"
-                                            onClick={() => setScreenshotPreview({
-                                              open: true,
-                                              screenshot,
-                                              locale: localeInfo?.name || loc.locale,
-                                              deviceType: set.displayInfo.name
-                                            })}
-                                          >
-                                            {screenshot.imageAsset?.templateUrl ? (
-                                              <img
-                                                src={screenshot.imageAsset.templateUrl
-                                                  .replace('{w}', '150')
-                                                  .replace('{h}', '300')
-                                                  .replace('{f}', 'png')}
-                                                alt={screenshot.fileName}
-                                                className="h-32 w-auto rounded-lg border border-border/50 object-cover hover:border-primary/50 hover:scale-105 transition-all duration-200"
-                                              />
-                                            ) : (
-                                              <div className="h-32 w-16 rounded-lg border border-border/50 bg-muted/50 flex items-center justify-center">
-                                                <Image className="h-6 w-6 text-muted-foreground/50" />
-                                              </div>
-                                            )}
-                                            <div className="absolute bottom-1 left-1 right-1 text-center">
-                                              <span className="text-[10px] bg-black/60 text-white px-1.5 py-0.5 rounded">
-                                                {idx + 1}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Upload Screenshots Section */}
-            <div className="mt-6 pt-6 border-t border-border/50">
-              <div className="flex items-center gap-3 mb-4">
-                <Upload className="h-5 w-5 text-info" />
-                <div>
-                  <h4 className="font-medium text-sm">Upload Screenshots</h4>
-                  <p className="text-xs text-muted-foreground">Drag & drop a folder with language subfolders (en, fr, de...)</p>
-                </div>
-              </div>
-
-              {/* Device type selector */}
-              <div className="mb-4">
-                <Label className="text-xs font-medium text-muted-foreground mb-2 block">Target Device</Label>
-                <select
-                  value={selectedDisplayType}
-                  onChange={(e) => setSelectedDisplayType(e.target.value)}
-                  className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                >
-                  {Object.entries(SCREENSHOT_DISPLAY_TYPES).map(([key, info]) => (
-                    <option key={key} value={key}>{info.name} - {info.device}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Upload options */}
-              <div className="mb-4 p-3 rounded-lg bg-muted/20 border border-border/30">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={deleteExistingScreenshots}
-                    onChange={(e) => setDeleteExistingScreenshots(e.target.checked)}
-                    className="h-4 w-4 rounded border-border text-info focus:ring-info"
-                  />
-                  <span className="text-sm">Replace existing screenshots</span>
-                </label>
-                {deleteExistingScreenshots && (
-                  <p className="text-xs text-warning flex items-center gap-1 mt-2">
-                    <AlertCircle className="h-3 w-3" />
-                    Existing screenshots for the selected device type will be deleted before uploading
-                  </p>
-                )}
-              </div>
-
-              {/* Drop zone */}
-              <div
-                onDragOver={(e) => { e.preventDefault(); setIsDraggingScreenshots(true) }}
-                onDragLeave={(e) => { e.preventDefault(); setIsDraggingScreenshots(false) }}
-                onDrop={handleScreenshotDrop}
-                className={`
-                  relative rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200
-                  ${isDraggingScreenshots
-                    ? 'border-info bg-info/10 scale-[1.02]'
-                    : 'border-border/50 hover:border-info/50 hover:bg-muted/30'
-                  }
-                `}
-              >
-                <FolderOpen className={`h-10 w-10 mx-auto mb-3 ${isDraggingScreenshots ? 'text-info' : 'text-muted-foreground/50'}`} />
-                <p className={`font-medium ${isDraggingScreenshots ? 'text-info' : 'text-muted-foreground'}`}>
-                  {isDraggingScreenshots ? 'Drop your folder here!' : 'Drop screenshot folder here'}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Folder structure: /en/*.png, /fr/*.png, /de/*.png...
-                </p>
-              </div>
-
-              {/* Upload queue */}
-              {screenshotUploadQueue.length > 0 && (
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h5 className="text-sm font-medium">Upload Queue</h5>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setScreenshotUploadQueue([])}
-                      disabled={isUploadingScreenshots}
-                      className="h-7 text-xs text-muted-foreground hover:text-destructive"
-                    >
-                      Clear all
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {screenshotUploadQueue.map(({ locale, files, status }) => {
-                      const localeInfo = ASC_LOCALES.find(l => l.code === locale)
-                      const localization = versionLocalizations.find(l => l.locale === locale)
-
-                      return (
-                        <div
-                          key={locale}
-                          className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                            status === 'done' ? 'bg-success/10 border-success/30' :
-                            status === 'error' ? 'bg-destructive/10 border-destructive/30' :
-                            status === 'uploading' ? 'bg-info/10 border-info/30' :
-                            'bg-muted/30 border-border/50'
-                          }`}
-                        >
-                          <span className="text-xl">{localeInfo?.flag || '🌐'}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-sm">{localeInfo?.name || locale}</span>
-                              <Badge variant="outline" className="text-xs">
-                                {files.length} file{files.length !== 1 ? 's' : ''}
-                              </Badge>
-                              {!localization && (
-                                <Badge variant="destructive" className="text-xs">
-                                  Not in version
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate mt-0.5">
-                              {files.map(f => f.name).join(', ')}
-                            </p>
-                          </div>
-                          {status === 'uploading' ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-info" />
-                          ) : status === 'done' ? (
-                            <CheckCircle2 className="h-4 w-4 text-success" />
-                          ) : status === 'error' ? (
-                            <AlertCircle className="h-4 w-4 text-destructive" />
-                          ) : (
-                            <button
-                              onClick={() => removeFromUploadQueue(locale)}
-                              className="p-1 rounded hover:bg-muted transition-colors"
-                            >
-                              <X className="h-4 w-4 text-muted-foreground" />
-                            </button>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-
-                  {/* Upload progress */}
-                  {isUploadingScreenshots && uploadProgress.total > 0 && (
-                    <div className="p-3 rounded-lg bg-info/10 border border-info/30">
-                      <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-info font-medium">Uploading...</span>
-                        <span className="text-muted-foreground">{uploadProgress.current}/{uploadProgress.total}</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full bg-info transition-all duration-300"
-                          style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2 truncate">{uploadProgress.currentFile}</p>
-                    </div>
-                  )}
-
-                  {/* Upload button */}
-                  <Button
-                    onClick={handleUploadScreenshots}
-                    disabled={isUploadingScreenshots || screenshotUploadQueue.every(q => q.status === 'done')}
-                    className="w-full h-10 bg-gradient-to-r from-info to-info hover:from-info/90 hover:to-info/90 border-0"
-                  >
-                    {isUploadingScreenshots ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload {screenshotUploadQueue.reduce((sum, q) => sum + q.files.length, 0)} Screenshots
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <AscScreenshots
+        selectedVersion={selectedVersion}
+        versionLocalizations={versionLocalizations}
+        handleLoadScreenshots={handleLoadScreenshots}
+        isLoadingScreenshots={isLoadingScreenshots}
+        screenshotsByLocale={screenshotsByLocale}
+        expandedScreenshotLocales={expandedScreenshotLocales}
+        toggleScreenshotLocale={toggleScreenshotLocale}
+        getDeviceIcon={getDeviceIcon}
+        setScreenshotPreview={setScreenshotPreview}
+        selectedDisplayType={selectedDisplayType}
+        setSelectedDisplayType={setSelectedDisplayType}
+        deleteExistingScreenshots={deleteExistingScreenshots}
+        setDeleteExistingScreenshots={setDeleteExistingScreenshots}
+        setIsDraggingScreenshots={setIsDraggingScreenshots}
+        handleScreenshotDrop={handleScreenshotDrop}
+        isDraggingScreenshots={isDraggingScreenshots}
+        screenshotUploadQueue={screenshotUploadQueue}
+        setScreenshotUploadQueue={setScreenshotUploadQueue}
+        isUploadingScreenshots={isUploadingScreenshots}
+        removeFromUploadQueue={removeFromUploadQueue}
+        uploadProgress={uploadProgress}
+        handleUploadScreenshots={handleUploadScreenshots}
+      />
 
       {/* Translation Settings */}
-      {selectedVersion && versionLocalizations.length > 0 && (
-        <Card id="asc-translation" className="border-border/50 shadow-sm scroll-mt-6">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
-                <Sparkles className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">AI Translation</CardTitle>
-                <CardDescription>Auto-translate metadata to other languages</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {/* AI Provider Info */}
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
-              <span className="text-sm text-muted-foreground">Using:</span>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background">
-                <span className="text-sm font-medium">{PROVIDERS[aiConfig.provider]?.name || aiConfig.provider}</span>
-                <span className="text-muted-foreground">/</span>
-                <span className="text-sm text-muted-foreground">
-                  {currentAiModel?.includes('inference-profile/')
-                    ? currentAiModel.split('/').pop().replace('global.anthropic.', '').replace(/-v\d+:\d+$/, '')
-                    : currentAiModel || 'No model'}
-                </span>
-              </div>
-              {!currentAiApiKey && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium ml-auto">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  Configure API key in sidebar
-                </div>
-              )}
-            </div>
-
-            {/* Source Locale */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Source Language</Label>
-              <select
-                value={sourceLocale}
-                onChange={(e) => setSourceLocale(e.target.value)}
-                className="w-full h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium max-w-xs focus:border-primary/50 focus:outline-none transition-colors"
-              >
-                {versionLocalizations.map(loc => {
-                  const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                  return (
-                    <option key={loc.locale} value={loc.locale}>
-                      {localeInfo?.flag} {localeInfo?.name || loc.locale}
-                    </option>
-                  )
-                })}
-              </select>
-            </div>
-
-            {/* Fields to translate */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Fields to Translate</Label>
-              <div className="flex flex-wrap gap-2">
-                {TRANSLATABLE_FIELDS.map(field => {
-                  const isSelected = fieldsToTranslate.includes(field.key)
-                  return (
-                    <button
-                      key={field.key}
-                      onClick={() => handleFieldToggle(field.key)}
-                      className={`
-                        flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200
-                        ${isSelected
-                          ? 'border-primary bg-primary/10 text-foreground shadow-sm'
-                          : 'border-border/50 bg-background hover:border-border hover:bg-muted/30'
-                        }
-                      `}
-                    >
-                      <div className={`
-                        flex h-4 w-4 items-center justify-center rounded border-2 transition-all
-                        ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}
-                      `}>
-                        {isSelected && (
-                          <svg className="h-2.5 w-2.5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <span>{field.label}</span>
-                      <span className="text-xs text-muted-foreground">({field.limit})</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Target Locales */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Target Languages</Label>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (targetLocales.length === availableTargetLocales.length) {
-                      setTargetLocales([])
-                    } else {
-                      setTargetLocales(availableTargetLocales.map(l => l.code))
-                    }
-                  }}
-                  className="h-9"
-                >
-                  {targetLocales.length === availableTargetLocales.length ? 'Deselect All' : 'Select All'}
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {availableTargetLocales.map(locale => {
-                  const exists = existingLocales.includes(locale.code)
-                  const isSelected = targetLocales.includes(locale.code)
-                  return (
-                    <button
-                      key={locale.code}
-                      onClick={() => handleLocaleToggle(locale.code)}
-                      className={`
-                        flex items-center gap-2 p-3 rounded-xl border text-left transition-all duration-200
-                        ${isSelected
-                          ? 'border-primary bg-primary/5 shadow-sm'
-                          : exists
-                            ? 'border-success/30 bg-success/5 hover:border-success/50'
-                            : 'border-border/50 bg-background hover:border-border hover:bg-muted/30'
-                        }
-                      `}
-                    >
-                      <div className={`
-                        flex h-4 w-4 items-center justify-center rounded border-2 transition-all
-                        ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}
-                      `}>
-                        {isSelected && (
-                          <svg className="h-2.5 w-2.5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <span className="text-lg">{locale.flag}</span>
-                      <span className="text-sm font-medium flex-1">{locale.name}</span>
-                      {exists && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success/10 text-success">
-                          <CheckCircle2 className="h-3 w-3" />
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Translate Button */}
-            <Button
-              onClick={handleTranslate}
-              disabled={isTranslating || !currentAiApiKey || targetLocales.length === 0 || fieldsToTranslate.length === 0}
-              className="w-full h-12 text-base font-semibold gradient-primary border-0"
-              size="lg"
-            >
-              {isTranslating ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Translating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Translate to {targetLocales.length} language{targetLocales.length !== 1 ? 's' : ''}
-                </>
-              )}
-            </Button>
-
-            {/* Progress */}
-            {isTranslating && (
-              <div className="space-y-4 p-5 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-sm font-medium">Translation in progress</span>
-                  </div>
-                  <span className="text-sm font-mono text-muted-foreground">{translationProgress.current} / {translationProgress.total}</span>
-                </div>
-                <div className="relative h-3 rounded-full bg-background overflow-hidden">
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full gradient-primary transition-all duration-300"
-                    style={{ width: `${(translationProgress.current / translationProgress.total) * 100}%` }}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">{translationProgress.status}</p>
-              </div>
-            )}
-
-            {/* Translation Complete Alert */}
-            {translationAlert.show && (
-              <div className={`relative flex items-start gap-3 p-4 rounded-xl border ${translationAlert.success ? 'bg-success/10 border-success/20 text-success' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
-                {translationAlert.success ? <CheckCircle2 className="h-5 w-5 mt-0.5" /> : <AlertCircle className="h-5 w-5 mt-0.5" />}
-                <div className="flex-1">
-                  <p className="font-semibold">{translationAlert.success ? 'Success!' : 'Completed with errors'}</p>
-                  <p className="text-sm opacity-80">{translationAlert.message}</p>
-                </div>
-                <button
-                  onClick={() => setTranslationAlert(prev => ({ ...prev, show: false }))}
-                  className="p-1 rounded-lg hover:bg-background/50 transition-colors"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      <AscTranslationSettings
+        selectedVersion={selectedVersion}
+        versionLocalizations={versionLocalizations}
+        aiConfig={aiConfig}
+        currentAiModel={currentAiModel}
+        currentAiApiKey={currentAiApiKey}
+        sourceLocale={sourceLocale}
+        setSourceLocale={setSourceLocale}
+        TRANSLATABLE_FIELDS={TRANSLATABLE_FIELDS}
+        fieldsToTranslate={fieldsToTranslate}
+        handleFieldToggle={handleFieldToggle}
+        targetLocales={targetLocales}
+        availableTargetLocales={availableTargetLocales}
+        setTargetLocales={setTargetLocales}
+        existingLocales={existingLocales}
+        handleLocaleToggle={handleLocaleToggle}
+        handleTranslate={handleTranslate}
+        isTranslating={isTranslating}
+        translationProgress={translationProgress}
+        translationAlert={translationAlert}
+        setTranslationAlert={setTranslationAlert}
+      />
 
       {/* Logs */}
-      <Card id="asc-logs" className="border-border/50 shadow-sm scroll-mt-6">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted-foreground/10">
-              <Terminal className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Activity Log</CardTitle>
-              <CardDescription>Track API calls and events</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-48 rounded-xl border border-border/50 bg-muted/20">
-            {logs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Terminal className="h-8 w-8 mb-2 opacity-50" />
-                <p className="text-sm">No activity yet</p>
-              </div>
-            ) : (
-              <div className="p-4 space-y-2">
-                {logs.map((log, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-start gap-3 text-sm py-1.5 px-3 rounded-lg transition-colors ${
-                      log.type === 'error' ? 'bg-destructive/10' :
-                      log.type === 'success' ? 'bg-success/10' :
-                      'hover:bg-muted/50'
-                    }`}
-                  >
-                    <span className={`mt-0.5 ${
-                      log.type === 'error' ? 'text-destructive' :
-                      log.type === 'success' ? 'text-success' :
-                      'text-muted-foreground'
-                    }`}>
-                      {log.type === 'error' ? <AlertCircle className="h-4 w-4" /> :
-                       log.type === 'success' ? <CheckCircle2 className="h-4 w-4" /> :
-                       <Clock className="h-4 w-4" />}
-                    </span>
-                    <span className="font-mono text-xs text-muted-foreground shrink-0 pt-0.5">{log.timestamp}</span>
-                    <span className={`break-all ${
-                      log.type === 'error' ? 'text-destructive' :
-                      log.type === 'success' ? 'text-success' :
-                      'text-foreground'
-                    }`}>{log.message}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
+      <AscLogs logs={logs} />
 
       {/* Edit Dialog */}
-      <Dialog open={editDialog.open} onOpenChange={(open) => !open && setEditDialog({ ...editDialog, open: false })}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Localization</DialogTitle>
-            <DialogDescription>
-              {ASC_LOCALES.find(l => l.code === editDialog.locale)?.flag}{' '}
-              {ASC_LOCALES.find(l => l.code === editDialog.locale)?.name || editDialog.locale}
-            </DialogDescription>
-          </DialogHeader>
-          {editDialog.localization && editDialog.type === 'version' && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Description (max 4000 chars)</Label>
-                <Textarea
-                  value={editDialog.localization.description}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, description: e.target.value }
-                  }))}
-                  rows={6}
-                  maxLength={4000}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {editDialog.localization.description?.length || 0}/4000
-                </span>
-              </div>
-              <div className="space-y-2">
-                <Label>What's New (max 4000 chars)</Label>
-                <Textarea
-                  value={editDialog.localization.whatsNew}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, whatsNew: e.target.value }
-                  }))}
-                  rows={4}
-                  maxLength={4000}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {editDialog.localization.whatsNew?.length || 0}/4000
-                </span>
-              </div>
-              <div className="space-y-2">
-                <Label>Promotional Text (max 170 chars)</Label>
-                <Textarea
-                  value={editDialog.localization.promotionalText}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, promotionalText: e.target.value }
-                  }))}
-                  rows={2}
-                  maxLength={170}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {editDialog.localization.promotionalText?.length || 0}/170
-                </span>
-              </div>
-              <div className="space-y-2">
-                <Label>Keywords (max 100 chars, comma-separated)</Label>
-                <Input
-                  value={editDialog.localization.keywords}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, keywords: e.target.value }
-                  }))}
-                  maxLength={100}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {editDialog.localization.keywords?.length || 0}/100
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Support URL</Label>
-                  <Input
-                    type="url"
-                    placeholder="https://example.com/support"
-                    value={editDialog.localization.supportUrl || ''}
-                    onChange={(e) => setEditDialog(prev => ({
-                      ...prev,
-                      localization: { ...prev.localization, supportUrl: e.target.value }
-                    }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Marketing URL</Label>
-                  <Input
-                    type="url"
-                    placeholder="https://example.com"
-                    value={editDialog.localization.marketingUrl || ''}
-                    onChange={(e) => setEditDialog(prev => ({
-                      ...prev,
-                      localization: { ...prev.localization, marketingUrl: e.target.value }
-                    }))}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-          {editDialog.localization && editDialog.type === 'appInfo' && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>App Name (max 30 chars)</Label>
-                <Input
-                  value={editDialog.localization.name}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, name: e.target.value }
-                  }))}
-                  maxLength={30}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Subtitle (max 30 chars)</Label>
-                <Input
-                  value={editDialog.localization.subtitle}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, subtitle: e.target.value }
-                  }))}
-                  maxLength={30}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Privacy Policy URL</Label>
-                <Input
-                  type="url"
-                  placeholder="https://example.com/privacy"
-                  value={editDialog.localization.privacyPolicyUrl}
-                  onChange={(e) => setEditDialog(prev => ({
-                    ...prev,
-                    localization: { ...prev.localization, privacyPolicyUrl: e.target.value }
-                  }))}
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialog({ ...editDialog, open: false })}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit}>
-              Save to App Store Connect
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AscEditDialog
+        editDialog={editDialog}
+        setEditDialog={setEditDialog}
+        handleSaveEdit={handleSaveEdit}
+      />
 
       {/* Create Version Dialog */}
-      <Dialog open={createVersionDialog.open} onOpenChange={(open) => !open && setCreateVersionDialog(prev => ({ ...prev, open: false }))}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle>Create New Version</DialogTitle>
-            <DialogDescription>
-              Create a new App Store version for {selectedApp?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Version Number</Label>
-              <Input
-                placeholder="1.0.0"
-                value={createVersionDialog.versionString}
-                onChange={(e) => setCreateVersionDialog(prev => ({ ...prev, versionString: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Platform</Label>
-              <select
-                value={createVersionDialog.platform}
-                onChange={(e) => setCreateVersionDialog(prev => ({ ...prev, platform: e.target.value }))}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option value="IOS">iOS</option>
-                <option value="MAC_OS">macOS</option>
-                <option value="TV_OS">tvOS</option>
-                <option value="VISION_OS">visionOS</option>
-              </select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setCreateVersionDialog({ open: false, versionString: '', platform: 'IOS', isCreating: false })}
-              disabled={createVersionDialog.isCreating}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateVersion}
-              disabled={createVersionDialog.isCreating || !createVersionDialog.versionString.trim()}
-            >
-              {createVersionDialog.isCreating ? 'Creating...' : 'Create Version'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AscCreateVersionDialog
+        createVersionDialog={createVersionDialog}
+        setCreateVersionDialog={setCreateVersionDialog}
+        handleCreateVersion={handleCreateVersion}
+        selectedApp={selectedApp}
+      />
 
       {/* Screenshot Preview Dialog */}
-      <Dialog open={screenshotPreview.open} onOpenChange={(open) => !open && setScreenshotPreview({ open: false, screenshot: null, locale: '', deviceType: '' })}>
-        <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[900px] max-h-[90vh] p-0 overflow-hidden">
-          <div className="relative">
-            {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/60 to-transparent">
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="bg-black/40 border-white/20 text-white">
-                  {screenshotPreview.locale}
-                </Badge>
-                <Badge variant="outline" className="bg-black/40 border-white/20 text-white">
-                  {screenshotPreview.deviceType}
-                </Badge>
-              </div>
-              <button
-                onClick={() => setScreenshotPreview({ open: false, screenshot: null, locale: '', deviceType: '' })}
-                className="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Image */}
-            <div className="flex items-center justify-center bg-black/95 min-h-[60vh]">
-              {screenshotPreview.screenshot?.imageAsset?.templateUrl ? (
-                <img
-                  src={screenshotPreview.screenshot.imageAsset.templateUrl
-                    .replace('{w}', '1200')
-                    .replace('{h}', '2400')
-                    .replace('{f}', 'png')}
-                  alt={screenshotPreview.screenshot.fileName}
-                  className="max-h-[85vh] w-auto object-contain"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-white/50 py-20">
-                  <Image className="h-16 w-16 mb-4" />
-                  <p>Image not available</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer with filename */}
-            {screenshotPreview.screenshot?.fileName && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                <p className="text-white/80 text-sm text-center truncate">
-                  {screenshotPreview.screenshot.fileName}
-                </p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AscScreenshotPreviewDialog
+        screenshotPreview={screenshotPreview}
+        setScreenshotPreview={setScreenshotPreview}
+      />
     </div>
   )
 }
