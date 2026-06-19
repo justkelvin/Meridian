@@ -230,10 +230,12 @@ export function ConfigDialog({
 
                     {/* API Key */}
                     <div className="space-y-2">
-                      <Label className="text-xs font-medium text-muted-foreground">API Key</Label>
+                      <Label className="text-xs font-medium text-muted-foreground">
+                        {providerConfig.provider === 'bedrock' ? 'Bedrock API Key' : 'API Key'}
+                      </Label>
                       <Input
                         type="password"
-                        placeholder={providerConfig.provider === 'openai' ? 'sk-...' : 'Enter your API key...'}
+                        placeholder={providerConfig.provider === 'openai' ? 'sk-...' : providerConfig.provider === 'bedrock' ? 'Enter your Bedrock API key...' : 'Enter your API key...'}
                         value={currentApiKey}
                         onChange={(e) => handleApiKeyChange(e.target.value)}
                         className="h-9 text-sm bg-muted/30 border-border/50 focus:border-primary/50"

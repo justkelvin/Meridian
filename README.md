@@ -119,7 +119,7 @@ Meridian supports six AI providers for translation. You can switch providers at 
 |---|---|---|
 | OpenAI | API key (`sk-...`) | Supports service tier selection (auto, default, flex, priority) |
 | Azure OpenAI | API key + endpoint URL | Custom deployment names; uses `2025-01-01-preview` API version |
-| AWS Bedrock | Access key + secret key | Uses the Converse API; Claude models via inference profiles |
+| AWS Bedrock | Bedrock API key + AWS region | Uses the Converse API with Bearer API-key auth; Claude models via inference profiles |
 | Anthropic | API key | Direct browser access via `anthropic-dangerous-direct-browser-access` header |
 | Google Gemini | API key | Uses the `generateContent` endpoint with JSON response mode |
 | GitHub Models | Personal access token | Routes through `models.inference.ai.azure.com` |
@@ -233,7 +233,7 @@ Open the configuration panel and select your preferred provider. Enter the API k
 |---|---|
 | OpenAI | API key |
 | Azure OpenAI | API key, endpoint URL, deployment name |
-| AWS Bedrock | Access key ID, secret access key, AWS region |
+| AWS Bedrock | Bedrock API key, AWS region |
 | Anthropic | API key |
 | Google Gemini | API key |
 | GitHub Models | Personal access token |

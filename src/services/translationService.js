@@ -321,15 +321,16 @@ async function callAzure(
   return result.choices[0].message.content;
 }
 
-// AWS Bedrock API
-async function callBedrock(apiKey, model, region, systemMessage, userMessage) {
+// AWS Bedrock API key authentication.
+// This uses a Bedrock API key as a Bearer token, not AWS access key/secret SigV4 credentials.
+async function callBedrock(bedrockApiKey, model, region, systemMessage, userMessage) {
   const endpoint = `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(model)}/converse`;
 
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${bedrockApiKey}`,
     },
     body: JSON.stringify({
       messages: [
