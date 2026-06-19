@@ -1,4 +1,6 @@
 import * as jose from 'jose'
+import SparkMD5 from 'spark-md5'
+import { translateText } from './translationService'
 
 // Use proxy to avoid CORS
 // In production, set VITE_ASC_PROXY_URL to your Cloudflare Worker URL
@@ -507,6 +509,7 @@ const PROVIDER_DELAYS = {
   azure: 200,
   bedrock: 300,
   anthropic: 200,
+  gemini: 200,
 }
 
 // Helper function to add delay between requests
@@ -515,8 +518,6 @@ function delay(ms) {
 }
 
 export async function translateAppStoreContent(text, targetLocale, aiConfig, fieldType = 'description') {
-  const { provider, apiKey, model, region } = aiConfig
-
   // Character limits per field type
   const charLimits = {
     description: 4000,
@@ -549,121 +550,11 @@ CRITICAL CONSTRAINTS:
 6. Preserve formatting like newlines if present in the source.`
 
   const userMessage = `Translate to ${localeName} (max ${limit} chars):\n\n${text}`
+  const prompt = `${systemMessage}\n\n${userMessage}`
 
   try {
-    let content
-
-    if (provider === 'openai') {
-      console.log('[ASC Translation] Calling OpenAI API...')
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: userMessage }
-          ],
-        })
-      })
-
-      const result = await response.json()
-      console.log('[ASC Translation] OpenAI response:', result.error ? result.error : 'OK')
-      if (result.error) throw new Error(result.error.message || JSON.stringify(result.error))
-      if (!result.choices?.[0]?.message?.content) {
-        throw new Error(`Invalid OpenAI API response: ${JSON.stringify(result).slice(0, 200)}`)
-      }
-      content = result.choices[0].message.content.trim()
-    } else if (provider === 'azure') {
-      console.log('[ASC Translation] Calling Azure OpenAI API...')
-      const { endpoint } = aiConfig
-      if (!endpoint) {
-        throw new Error('Azure endpoint is required')
-      }
-      let baseUrl = endpoint.replace(/\/+$/, '')
-      const openaiIndex = baseUrl.indexOf('/openai/')
-      if (openaiIndex !== -1) {
-        baseUrl = baseUrl.substring(0, openaiIndex)
-      }
-      const url = `${baseUrl}/openai/deployments/${encodeURIComponent(model)}/chat/completions?api-version=2025-01-01-preview`
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: userMessage }
-          ],
-        })
-      })
-
-      const result = await response.json()
-      console.log('[ASC Translation] Azure response:', result.error ? result.error : 'OK')
-      if (result.error) throw new Error(result.error.message || JSON.stringify(result.error))
-      if (!result.choices?.[0]?.message?.content) {
-        throw new Error(`Invalid Azure API response: ${JSON.stringify(result).slice(0, 200)}`)
-      }
-      content = result.choices[0].message.content.trim()
-    } else if (provider === 'bedrock') {
-      console.log('[ASC Translation] Calling Bedrock API...')
-      const bedrockEndpoint = `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(model)}/converse`
-
-      const response = await fetch(bedrockEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: [{ text: userMessage }] }],
-          system: [{ text: systemMessage }],
-          inferenceConfig: { maxTokens: 4096 }
-        })
-      })
-
-      const result = await response.json()
-      console.log('[ASC Translation] Bedrock response:', result.message ? result.message : 'OK')
-      if (result.message) throw new Error(result.message)
-      if (!result.output?.message?.content?.[0]?.text) {
-        throw new Error(`Invalid Bedrock API response: ${JSON.stringify(result).slice(0, 200)}`)
-      }
-      content = result.output.message.content[0].text.trim()
-    } else if (provider === 'github') {
-      console.log('[ASC Translation] Calling GitHub Models...')
-      const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: userMessage }
-          ],
-          max_tokens: 4096
-        })
-      })
-
-      const result = await response.json()
-      console.log('[ASC Translation] GitHub Models response:', result.error ? result.error : 'OK')
-      if (result.error) throw new Error(result.error.message || JSON.stringify(result.error))
-      if (!result.choices?.[0]?.message?.content) {
-        throw new Error(`Invalid GitHub Models API response: ${JSON.stringify(result).slice(0, 200)}`)
-      }
-      content = result.choices[0].message.content.trim()
-    } else {
-      throw new Error(`Unknown provider: ${provider}`)
-    }
+    let content = await translateText(prompt, 'en-US', targetLocale, aiConfig)
+    content = content.trim()
 
     // Enforce character limit
     if (content.length > limit) {
@@ -937,13 +828,7 @@ export async function commitScreenshotUpload(credentials, screenshotId, checksum
 
 // Calculate MD5 checksum for a file
 export async function calculateChecksum(fileData) {
-  // Use SubtleCrypto to calculate MD5-like checksum
-  // Note: WebCrypto doesn't support MD5, so we'll use SHA-256 and Apple should accept it
-  // Actually, Apple expects MD5 checksum, let's use a simple implementation
-  const hashBuffer = await crypto.subtle.digest('SHA-256', fileData)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  return hashHex
+  return SparkMD5.ArrayBuffer.hash(fileData)
 }
 
 // Delete a screenshot

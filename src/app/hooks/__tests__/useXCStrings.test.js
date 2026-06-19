@@ -1,8 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useXCStrings } from '../useXCStrings'
-import * as xcstringsParser from '@/utils/xcstringsParser'
-import * as translationService from '@/services/translationService'
 
 // Mock dependencies
 vi.mock('@/utils/xcstringsParser')

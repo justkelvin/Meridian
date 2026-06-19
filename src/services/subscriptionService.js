@@ -543,12 +543,16 @@ export async function getSubscriptionPricesWithDetails(credentials, subscription
     const pricesData = await apiRequest(nextUrl, token)
     if (!pricesData?.data) break
 
-    const included = pricesData.included || []
+    const pricePointsById = new Map(
+      (pricesData.included || [])
+        .filter(item => item.type === 'subscriptionPricePoints')
+        .map(item => [item.id, item])
+    )
     
-    // Match by index: data[i] corresponds to included[i]
-    const pagePrices = pricesData.data.map((price, idx) => {
+    const pagePrices = pricesData.data.map((price) => {
       const decoded = decodeBase64Id(price.id)
-      const pricePoint = included[idx]
+      const pricePointId = price.relationships?.subscriptionPricePoint?.data?.id
+      const pricePoint = pricePointId ? pricePointsById.get(pricePointId) : null
 
       return {
         id: price.id,
